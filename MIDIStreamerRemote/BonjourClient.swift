@@ -6,6 +6,11 @@ class BonjourClient: NSObject, ObservableObject, NetServiceDelegate, NetServiceB
     private var netServiceBrowser: NetServiceBrowser?
     private var connection: NWConnection?
     private var isConnected = false  // Track connection state
+    private var buffer = Data()
+    private var receivedData = Data() // Store received data chunks
+    
+    @Published var commands: [OBSCommand] = []
+
 
     // Start browsing for services
     func startBrowsing() {
@@ -64,24 +69,99 @@ class BonjourClient: NSObject, ObservableObject, NetServiceDelegate, NetServiceB
         print("Failed to resolve service \(sender.name): \(errorDict)")
     }
 
+    
+   
+    private func receiveMessages() {
+        connection?.receive(minimumIncompleteLength: 1, maximumLength: 1024) { [weak self] data, context, isComplete, error in
+            guard let self = self else { return }
+            
+            if let data = data {
+                // Log the received raw data size
+                print("Received raw data: \(data.count) bytes")
+                // Append the received data to the aggregate variable
+                self.receivedData.append(data)
+
+                // Optionally log the contents of the received data as a string
+                if let message = String(data: data, encoding: .utf8) {
+                    print("Received chunk: \(message)")
+                }
+                
+                // Check if we have received a complete message (assuming JSON array format)
+                if let jsonString = String(data: self.receivedData, encoding: .utf8) {
+                    // Check for closing bracket to determine if we have complete JSON
+                    if jsonString.trimmingCharacters(in: .whitespacesAndNewlines).hasSuffix("]") {
+                        self.decodeReceivedData()
+                    }
+                }
+            }
+
+            if isComplete {
+                print("Connection closed")
+                self.disconnect() // Optionally disconnect after completion
+            } else if error != nil {
+                print("Error receiving data: \(error!)")
+                self.disconnect()
+            } else {
+                self.receiveMessages() // Continue receiving more data
+            }
+        }
+    }
+    
+    private func decodeReceivedData() {
+            do {
+                // Attempt to decode the complete received data
+                let decodedCommands = try JSONDecoder().decode([OBSCommand].self, from: receivedData)
+                DispatchQueue.main.async {
+                    self.commands = decodedCommands // Update the commands array
+                    print("Successfully decoded commands: \(self.commands)")
+                }
+            } catch {
+                print("Failed to decode received data: \(error)")
+            }
+            
+            // Clear the received data buffer for the next reception
+            receivedData = Data()
+        }
+
+    private func processReceivedData() {
+        do {
+            let library = try JSONDecoder().decode([OBSCommand].self, from: receivedData)
+            print("Library received: \(library)")
+        } catch {
+            print("Failed to decode received data: \(error)")
+        }
+    }
+
+
+    private func disconnect() {
+        if let connection = connection {
+            connection.cancel()
+            print("Disconnected from service")
+        }
+        self.connection = nil
+        self.isConnected = false
+    }
+
     private func connectToService(at host: String, port: UInt16) {
         disconnect() // Ensure previous connection is terminated
         connection = NWConnection(host: NWEndpoint.Host(host), port: NWEndpoint.Port(rawValue: port)!, using: .tcp)
 
         connection?.stateUpdateHandler = { [weak self] state in
+            guard let self = self else { return }
             switch state {
             case .ready:
                 print("Connected to \(host) on port \(port)")
-                self?.isConnected = true
-                self?.receiveMessages()
+                self.isConnected = true
+                self.receiveMessages()
             case .failed(let error):
                 print("Connection failed: \(error)")
-                self?.isConnected = false
+                self.isConnected = false
+                // Optionally, implement retry logic here
             case .waiting:
                 print("Connection is waiting")
             case .cancelled:
                 print("Connection cancelled")
-                self?.isConnected = false
+                self.isConnected = false
             default:
                 break
             }
@@ -89,28 +169,6 @@ class BonjourClient: NSObject, ObservableObject, NetServiceDelegate, NetServiceB
 
         // Start the connection
         connection?.start(queue: .main)
-    }
-
-    private func receiveMessages() {
-        connection?.receive(minimumIncompleteLength: 1, maximumLength: 1024) { [weak self] data, context, isComplete, error in
-            if let data = data {
-                let message = String(data: data, encoding: .utf8) ?? "Unknown message"
-                print("Received: \(message)")
-            }
-            if isComplete {
-                print("Connection closed")
-                self?.disconnect() // Optionally disconnect on completion
-            } else {
-                self?.receiveMessages() // Continue receiving messages
-            }
-        }
-    }
-
-    private func disconnect() {
-        connection?.cancel()
-        connection = nil
-        isConnected = false
-        print("Disconnected from service")
     }
 
     func sendMessage(_ message: String) {

@@ -1,54 +1,28 @@
 import SwiftUI
 
 struct ContentView: View {
-    @StateObject private var bonjourClient = BonjourClient()
-    @State private var messageToSend = ""
-    
-    @State private var volume: Double = 0.5
-    @State private var brightness: Double = 0.5
-    
+    @ObservedObject var bonjourClient = BonjourClient()
+
     var body: some View {
-        VStack {
-            NavigationView {
-                List(bonjourClient.services, id: \.name) { service in
-                    VStack(alignment: .leading) {
-                        Text(service.name)
-                        Text(service.type)
-                            .font(.subheadline)
-                            .foregroundColor(.gray)
-                    }
-                    .onTapGesture {
-                        bonjourClient.connectToService(service) // Connect to the service when tapped
-                    }
+        NavigationView {
+            List(bonjourClient.commands) { command in
+                Button(action: {
+                    // Handle button action for each command
+                    print("Button tapped for command: \(command.name)")
+                    // You can send a message or trigger an action here based on the command
+                }) {
+                    Text(command.name) // Display the command name
                 }
-                .navigationTitle("Bonjour Services")
-                .onAppear {
-                    bonjourClient.startBrowsing()
-                }
-                .onDisappear {
-                    bonjourClient.stopBrowsing()
-                }
-                
             }
-            
-            TextField("Enter message", text: $messageToSend)
-                .textFieldStyle(RoundedBorderTextFieldStyle())
-                .padding()
-            Button("Send Message") {
-                bonjourClient.sendMessage(messageToSend)
-                messageToSend = "" // Clear the input field after sending
+            .navigationTitle("OBS Commands")
+            .onAppear {
+                // Start browsing for services
+                bonjourClient.startBrowsing()
             }
-            .padding()
+            .onDisappear {
+                // Stop browsing for services
+                bonjourClient.stopBrowsing()
+            }
         }
-    }
-}
-
-
-
-
-extension BonjourClient {
-    func connectToService(_ service: NetService) {
-        service.resolve(withTimeout: 5.0)
-        // Setting the delegate should already happen in didFind service
     }
 }
