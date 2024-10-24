@@ -3,7 +3,10 @@ import SwiftUI
 struct ContentView: View {
     @StateObject private var bonjourClient = BonjourClient()
     @State private var messageToSend = ""
-
+    
+    @State private var volume: Double = 0.5
+    @State private var brightness: Double = 0.5
+    
     var body: some View {
         VStack {
             NavigationView {
@@ -25,7 +28,9 @@ struct ContentView: View {
                 .onDisappear {
                     bonjourClient.stopBrowsing()
                 }
+                
             }
+            
             TextField("Enter message", text: $messageToSend)
                 .textFieldStyle(RoundedBorderTextFieldStyle())
                 .padding()
@@ -37,6 +42,9 @@ struct ContentView: View {
         }
     }
 }
+
+
+
 
 extension BonjourClient {
     func connectToService(_ service: NetService) {
