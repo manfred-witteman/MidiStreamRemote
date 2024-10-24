@@ -170,6 +170,27 @@ class BonjourClient: NSObject, ObservableObject, NetServiceDelegate, NetServiceB
         // Start the connection
         connection?.start(queue: .main)
     }
+    
+    func sendCommand(_ command: OBSCommand) {
+        guard isConnected else {
+            print("Not connected to a service, unable to send message.")
+            return
+        }
+
+        do {
+            // Encode the command to JSON data
+            let data = try JSONEncoder().encode(command)
+            connection?.send(content: data, completion: .contentProcessed { error in
+                if let error = error {
+                    print("Failed to send command: \(error)")
+                } else {
+                    print("Command sent: \(command)")
+                }
+            })
+        } catch {
+            print("Failed to encode command to JSON: \(error)")
+        }
+    }
 
     func sendMessage(_ message: String) {
         guard isConnected else {

@@ -7,22 +7,24 @@ struct ContentView: View {
         NavigationView {
             List(bonjourClient.commands) { command in
                 Button(action: {
-                    // Handle button action for each command
                     print("Button tapped for command: \(command.name)")
-                    // You can send a message or trigger an action here based on the command
+                    sendCommand(command) // Send the entire command object
                 }) {
                     Text(command.name) // Display the command name
                 }
             }
             .navigationTitle("OBS Commands")
             .onAppear {
-                // Start browsing for services
                 bonjourClient.startBrowsing()
             }
             .onDisappear {
-                // Stop browsing for services
                 bonjourClient.stopBrowsing()
             }
         }
+    }
+    
+    // Function to send the entire OBSCommand object
+    func sendCommand(_ command: OBSCommand) {
+        bonjourClient.sendCommand(command) // Send the command object using BonjourClient
     }
 }
