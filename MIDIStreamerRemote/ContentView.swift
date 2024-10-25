@@ -37,9 +37,20 @@ struct ContentView: View {
             .navigationTitle("OBS Commands")
             .onAppear {
                 bonjourClient.startBrowsing()
+                // Add observers for app lifecycle notifications
+                NotificationCenter.default.addObserver(forName: UIApplication.willEnterForegroundNotification, object: nil, queue: .main) { _ in
+                    bonjourClient.startBrowsing()
+                }
+                
+                NotificationCenter.default.addObserver(forName: UIApplication.didBecomeActiveNotification, object: nil, queue: .main) { _ in
+                    bonjourClient.startBrowsing()
+                }
             }
             .onDisappear {
                 bonjourClient.stopBrowsing()
+                // Remove observers when the view disappears
+                NotificationCenter.default.removeObserver(self, name: UIApplication.willEnterForegroundNotification, object: nil)
+                NotificationCenter.default.removeObserver(self, name: UIApplication.didBecomeActiveNotification, object: nil)
             }
         }
     }
