@@ -11,13 +11,13 @@ typealias CommandMetadata = [String: String]
 
 // Define OBSCommand to be Codable and Identifiable
 struct OBSCommand: Identifiable, Decodable, Encodable {
-    var id: String
+    var id = UUID()
     var name: String
     var detail1: String
     var detail2: String
     var controllerType: ControllerType
-    var icon: String?
-    var metadata: [String: String]
+    var metadata: CommandMetadata
+    var icon: String
 }
 
 

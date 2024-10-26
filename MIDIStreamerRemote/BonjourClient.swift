@@ -5,17 +5,19 @@ class BonjourClient: NSObject, ObservableObject, NetServiceDelegate, NetServiceB
     @Published var services: [NetService] = []
     private var netServiceBrowser: NetServiceBrowser?
     private var connection: NWConnection?
-    private var isConnected = false  // Track connection state
+    private var isConnected = false
     private var buffer = Data()
-    private var receivedData = Data() // Store received data chunks
+    private var receivedData = Data()
     
     @Published var commands: [OBSCommand] = []
 
+    private let maxRetries = 3 // Maximum number of retry attempts
+    private var currentRetries = 0 // Track the current retry count
 
     // Start browsing for services
     func startBrowsing() {
         netServiceBrowser = NetServiceBrowser()
-        netServiceBrowser?.delegate = self // Set the delegate
+        netServiceBrowser?.delegate = self
         netServiceBrowser?.searchForServices(ofType: "_myapp._tcp.", inDomain: "")
         print("Started browsing for services...")
     }
@@ -24,16 +26,16 @@ class BonjourClient: NSObject, ObservableObject, NetServiceDelegate, NetServiceB
     func stopBrowsing() {
         netServiceBrowser?.stop()
         netServiceBrowser = nil
-        disconnect()  // Optionally disconnect when stopping browsing
+        disconnect()
         print("Stopped browsing for services.")
     }
 
     // NetServiceBrowserDelegate methods
     func netServiceBrowser(_ browser: NetServiceBrowser, didFind service: NetService, moreComing: Bool) {
-        service.delegate = self // Set the service delegate
+        service.delegate = self
         services.append(service)
         print("Found service: \(service.name)")
-        service.resolve(withTimeout: 5.0) // Attempt to resolve the service
+        service.resolve(withTimeout: 5.0)
     }
 
     func netServiceBrowser(_ browser: NetServiceBrowser, didRemove service: NetService, moreComing: Bool) {
@@ -49,15 +51,13 @@ class BonjourClient: NSObject, ObservableObject, NetServiceDelegate, NetServiceB
             return
         }
 
-        // Assuming you want to connect to the first resolved address
         if let address = addresses.first {
             let ipAddress = address.withUnsafeBytes {
                 ($0.baseAddress?.assumingMemoryBound(to: sockaddr_in.self).pointee.sin_addr).map { String(cString: inet_ntoa($0)) }
             }
 
-            // Ensure valid IP Address before connecting
             if let ipAddress = ipAddress, ipAddress != "127.0.0.1" && ipAddress != "0.0.0.0" {
-                let port: UInt16 = 8080 // Ensure this matches the service's port
+                let port: UInt16 = 8080
                 connectToService(at: ipAddress, port: port)
             } else {
                 print("Invalid address resolved: \(ipAddress ?? ""). Cannot connect.")
@@ -69,69 +69,49 @@ class BonjourClient: NSObject, ObservableObject, NetServiceDelegate, NetServiceB
         print("Failed to resolve service \(sender.name): \(errorDict)")
     }
 
-    
-   
     private func receiveMessages() {
         connection?.receive(minimumIncompleteLength: 1, maximumLength: 1024) { [weak self] data, context, isComplete, error in
             guard let self = self else { return }
-            
+
             if let data = data {
-                // Log the received raw data size
                 print("Received raw data: \(data.count) bytes")
-                // Append the received data to the aggregate variable
                 self.receivedData.append(data)
 
-                // Optionally log the contents of the received data as a string
                 if let message = String(data: data, encoding: .utf8) {
                     print("Received chunk: \(message)")
                 }
-                
-                // Check if we have received a complete message (assuming JSON array format)
-                if let jsonString = String(data: self.receivedData, encoding: .utf8) {
-                    // Check for closing bracket to determine if we have complete JSON
-                    if jsonString.trimmingCharacters(in: .whitespacesAndNewlines).hasSuffix("]") {
-                        self.decodeReceivedData()
-                    }
+
+                if let jsonString = String(data: self.receivedData, encoding: .utf8),
+                   jsonString.trimmingCharacters(in: .whitespacesAndNewlines).hasSuffix("]") {
+                    self.decodeReceivedData()
                 }
             }
 
             if isComplete {
                 print("Connection closed")
-                self.disconnect() // Optionally disconnect after completion
+                self.disconnect()
             } else if error != nil {
                 print("Error receiving data: \(error!)")
                 self.disconnect()
             } else {
-                self.receiveMessages() // Continue receiving more data
+                self.receiveMessages()
             }
         }
     }
-    
-    private func decodeReceivedData() {
-            do {
-                // Attempt to decode the complete received data
-                let decodedCommands = try JSONDecoder().decode([OBSCommand].self, from: receivedData)
-                DispatchQueue.main.async {
-                    self.commands = decodedCommands // Update the commands array
-                    print("Successfully decoded commands: \(self.commands)")
-                }
-            } catch {
-                print("Failed to decode received data: \(error)")
-            }
-            
-            // Clear the received data buffer for the next reception
-            receivedData = Data()
-        }
 
-    private func processReceivedData() {
+    private func decodeReceivedData() {
         do {
-            let library = try JSONDecoder().decode([OBSCommand].self, from: receivedData)
-            print("Library received: \(library)")
+            let decodedCommands = try JSONDecoder().decode([OBSCommand].self, from: receivedData)
+            DispatchQueue.main.async {
+                self.commands = decodedCommands
+                print("Successfully decoded commands: \(self.commands)")
+            }
         } catch {
             print("Failed to decode received data: \(error)")
         }
+        
+        receivedData = Data()
     }
-
 
     private func disconnect() {
         if let connection = connection {
@@ -143,7 +123,7 @@ class BonjourClient: NSObject, ObservableObject, NetServiceDelegate, NetServiceB
     }
 
     private func connectToService(at host: String, port: UInt16) {
-        disconnect() // Ensure previous connection is terminated
+        disconnect()
         connection = NWConnection(host: NWEndpoint.Host(host), port: NWEndpoint.Port(rawValue: port)!, using: .tcp)
 
         connection?.stateUpdateHandler = { [weak self] state in
@@ -152,11 +132,12 @@ class BonjourClient: NSObject, ObservableObject, NetServiceDelegate, NetServiceB
             case .ready:
                 print("Connected to \(host) on port \(port)")
                 self.isConnected = true
+                self.currentRetries = 0 // Reset retry count on successful connection
                 self.receiveMessages()
             case .failed(let error):
                 print("Connection failed: \(error)")
                 self.isConnected = false
-                // Optionally, implement retry logic here
+                self.retryConnection() // Retry connecting
             case .waiting:
                 print("Connection is waiting")
             case .cancelled:
@@ -167,18 +148,35 @@ class BonjourClient: NSObject, ObservableObject, NetServiceDelegate, NetServiceB
             }
         }
 
-        // Start the connection
         connection?.start(queue: .main)
     }
-    
+
+    private func retryConnection() {
+        if currentRetries < maxRetries {
+            currentRetries += 1
+            print("Retrying connection (\(currentRetries)/\(maxRetries))...")
+            
+            // Attempt to reconnect to the first available service in the list
+            if let service = services.first {
+                // Resolve the service again and connect
+                service.resolve(withTimeout: 5.0)
+            } else {
+                print("No services available to retry connection.")
+            }
+        } else {
+            print("Max retries reached. Unable to connect.")
+            currentRetries = 0 // Reset retry counter for future connection attempts
+        }
+    }
+
     func sendCommand(_ command: OBSCommand) {
         guard isConnected else {
-            print("Not connected to a service, unable to send message.")
+            print("Not connected to a service, retrying to connect...")
+            retryConnection()
             return
         }
 
         do {
-            // Encode the command to JSON data
             let data = try JSONEncoder().encode(command)
             connection?.send(content: data, completion: .contentProcessed { error in
                 if let error = error {
@@ -194,7 +192,8 @@ class BonjourClient: NSObject, ObservableObject, NetServiceDelegate, NetServiceB
 
     func sendMessage(_ message: String) {
         guard isConnected else {
-            print("Not connected to a service, unable to send message.")
+            print("Not connected to a service, retrying to connect...")
+            retryConnection()
             return
         }
 
