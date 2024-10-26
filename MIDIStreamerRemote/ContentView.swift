@@ -22,12 +22,34 @@ struct ContentView: View {
                                 print("Button tapped for command: \(command.name)")
                                 sendCommand(command) // Send the entire command object
                             }) {
-                                Text(command.name)
-                                    .frame(width: buttonSize, height: buttonSize) // Set both width and height to buttonSize
-                                    .background(Color.blue)
-                                    .foregroundColor(.white)
-                                    .cornerRadius(10)
-                                    .font(.headline)
+                                VStack {
+                                    Spacer() // Add a spacer to push the content down
+
+                                    // Display the icon as an SF Symbol
+                                    if let iconName = command.icon {
+                                        Image(systemName: iconName)
+                                            .resizable()
+                                            .scaledToFit()
+                                            .frame(width: 50, height: 50) // Make the icon larger
+                                            .foregroundColor(.white)
+                                    }
+
+                                    // Add some padding between the icon and the text
+                                    Spacer(minLength: 10)
+
+                                    Text(command.name)
+                                        .frame(maxWidth: buttonSize - 10) // Limit the width to force text wrapping
+                                        .foregroundColor(.white)
+                                        .font(.caption) // Use a smaller font size
+                                        .lineLimit(2) // Allow up to 2 lines before truncating
+                                        .multilineTextAlignment(.center) // Center the text
+                                    
+                                    Spacer() // Add a spacer below to improve centering
+                                }
+                                .padding() // Add padding around the content
+                                .frame(width: buttonSize, height: buttonSize)
+                                .background(setColor(type: command.controllerType))
+                                .cornerRadius(10)
                             }
                         }
                     }
@@ -58,5 +80,18 @@ struct ContentView: View {
     // Function to send the entire OBSCommand object
     func sendCommand(_ command: OBSCommand) {
         bonjourClient.sendCommand(command) // Send the command object using BonjourClient
+    }
+    
+    func setColor(type: ControllerType) -> Color {
+        switch type {
+        case .none:
+            return .red
+        case .absolute:
+            return .green
+        case .relative:
+            return .blue
+        default:
+            return .black
+        }
     }
 }
