@@ -17,7 +17,7 @@ extension SceneSource {
         case "text_ft2_source_v2":
             baseIcon = "text.page"
         default:
-            baseIcon = "camera.metering.unknown"
+            baseIcon = "questionmark.app"
         }
         
         return filled ? "\(baseIcon).fill" : baseIcon

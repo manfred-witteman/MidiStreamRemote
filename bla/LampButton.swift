@@ -31,7 +31,7 @@ struct LampButton: View {
                             .fill(sceneSource.sceneItemEnabled ? highlightColor : Color.black.opacity(0.3))
                             .frame(width: 40, height: 40)
 
-                        Image(systemName: sceneSource.getIcon())
+                        Image(systemName: sceneSource.sceneItemEnabled ? sceneSource.getIcon(filled: true) : sceneSource.getIcon(filled: false))
                             .resizable()
                             .scaledToFit()
                             .frame(width: 24, height: 24)
