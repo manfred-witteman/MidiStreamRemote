@@ -7,32 +7,19 @@
 	objects = {
 
 /* Begin PBXFileReference section */
-		74CA40E82CCA319700B1832A /* MIDIStreamerRemote.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MIDIStreamerRemote.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		744CDB662CEB684E004867CF /* bla.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = bla.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
-/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		74CA41062CCA492B00B1832A /* Exceptions for "MIDIStreamerRemote" folder in "MIDIStreamerRemote" target */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				Info.plist,
-			);
-			target = 74CA40E72CCA319700B1832A /* MIDIStreamerRemote */;
-		};
-/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
-
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		74CA40EA2CCA319700B1832A /* MIDIStreamerRemote */ = {
+		744CDB682CEB684E004867CF /* bla */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-				74CA41062CCA492B00B1832A /* Exceptions for "MIDIStreamerRemote" folder in "MIDIStreamerRemote" target */,
-			);
-			path = MIDIStreamerRemote;
+			path = bla;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		74CA40E52CCA319700B1832A /* Frameworks */ = {
+		744CDB632CEB684E004867CF /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -42,18 +29,18 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		74CA40DF2CCA319700B1832A = {
+		744CDB5D2CEB684E004867CF = {
 			isa = PBXGroup;
 			children = (
-				74CA40EA2CCA319700B1832A /* MIDIStreamerRemote */,
-				74CA40E92CCA319700B1832A /* Products */,
+				744CDB682CEB684E004867CF /* bla */,
+				744CDB672CEB684E004867CF /* Products */,
 			);
 			sourceTree = "<group>";
 		};
-		74CA40E92CCA319700B1832A /* Products */ = {
+		744CDB672CEB684E004867CF /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				74CA40E82CCA319700B1832A /* MIDIStreamerRemote.app */,
+				744CDB662CEB684E004867CF /* bla.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -61,64 +48,64 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		74CA40E72CCA319700B1832A /* MIDIStreamerRemote */ = {
+		744CDB652CEB684E004867CF /* bla */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 74CA40F62CCA319800B1832A /* Build configuration list for PBXNativeTarget "MIDIStreamerRemote" */;
+			buildConfigurationList = 744CDB742CEB684F004867CF /* Build configuration list for PBXNativeTarget "bla" */;
 			buildPhases = (
-				74CA40E42CCA319700B1832A /* Sources */,
-				74CA40E52CCA319700B1832A /* Frameworks */,
-				74CA40E62CCA319700B1832A /* Resources */,
+				744CDB622CEB684E004867CF /* Sources */,
+				744CDB632CEB684E004867CF /* Frameworks */,
+				744CDB642CEB684E004867CF /* Resources */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				74CA40EA2CCA319700B1832A /* MIDIStreamerRemote */,
+				744CDB682CEB684E004867CF /* bla */,
 			);
-			name = MIDIStreamerRemote;
+			name = bla;
 			packageProductDependencies = (
 			);
-			productName = MIDIStreamerRemote;
-			productReference = 74CA40E82CCA319700B1832A /* MIDIStreamerRemote.app */;
+			productName = bla;
+			productReference = 744CDB662CEB684E004867CF /* bla.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
-		74CA40E02CCA319700B1832A /* Project object */ = {
+		744CDB5E2CEB684E004867CF /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
-				LastSwiftUpdateCheck = 1600;
-				LastUpgradeCheck = 1600;
+				LastSwiftUpdateCheck = 1610;
+				LastUpgradeCheck = 1610;
 				TargetAttributes = {
-					74CA40E72CCA319700B1832A = {
-						CreatedOnToolsVersion = 16.0;
+					744CDB652CEB684E004867CF = {
+						CreatedOnToolsVersion = 16.1;
 					};
 				};
 			};
-			buildConfigurationList = 74CA40E32CCA319700B1832A /* Build configuration list for PBXProject "MIDIStreamerRemote" */;
+			buildConfigurationList = 744CDB612CEB684E004867CF /* Build configuration list for PBXProject "bla" */;
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
 				Base,
 			);
-			mainGroup = 74CA40DF2CCA319700B1832A;
+			mainGroup = 744CDB5D2CEB684E004867CF;
 			minimizedProjectReferenceProxies = 1;
 			preferredProjectObjectVersion = 77;
-			productRefGroup = 74CA40E92CCA319700B1832A /* Products */;
+			productRefGroup = 744CDB672CEB684E004867CF /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				74CA40E72CCA319700B1832A /* MIDIStreamerRemote */,
+				744CDB652CEB684E004867CF /* bla */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		74CA40E62CCA319700B1832A /* Resources */ = {
+		744CDB642CEB684E004867CF /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -128,7 +115,7 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		74CA40E42CCA319700B1832A /* Sources */ = {
+		744CDB622CEB684E004867CF /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -138,7 +125,7 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
-		74CA40F42CCA319800B1832A /* Debug */ = {
+		744CDB722CEB684F004867CF /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -190,7 +177,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.6;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
@@ -201,7 +188,7 @@
 			};
 			name = Debug;
 		};
-		74CA40F52CCA319800B1832A /* Release */ = {
+		744CDB732CEB684F004867CF /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -247,7 +234,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.6;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
@@ -257,19 +244,17 @@
 			};
 			name = Release;
 		};
-		74CA40F72CCA319800B1832A /* Debug */ = {
+		744CDB752CEB684F004867CF /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_ASSET_PATHS = "\"MIDIStreamerRemote/Preview Content\"";
+				DEVELOPMENT_ASSET_PATHS = "\"bla/Preview Content\"";
 				DEVELOPMENT_TEAM = Q65984WZCF;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = MIDIStreamerRemote/Info.plist;
-				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "We use your local network to discover services on your Mac.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -280,7 +265,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.bravenewapp.MIDIStreamerRemote;
+				PRODUCT_BUNDLE_IDENTIFIER = com.bravenewapp.bla;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -288,19 +273,17 @@
 			};
 			name = Debug;
 		};
-		74CA40F82CCA319800B1832A /* Release */ = {
+		744CDB762CEB684F004867CF /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_ASSET_PATHS = "\"MIDIStreamerRemote/Preview Content\"";
+				DEVELOPMENT_ASSET_PATHS = "\"bla/Preview Content\"";
 				DEVELOPMENT_TEAM = Q65984WZCF;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = MIDIStreamerRemote/Info.plist;
-				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "We use your local network to discover services on your Mac.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -311,7 +294,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.bravenewapp.MIDIStreamerRemote;
+				PRODUCT_BUNDLE_IDENTIFIER = com.bravenewapp.bla;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -322,25 +305,25 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		74CA40E32CCA319700B1832A /* Build configuration list for PBXProject "MIDIStreamerRemote" */ = {
+		744CDB612CEB684E004867CF /* Build configuration list for PBXProject "bla" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				74CA40F42CCA319800B1832A /* Debug */,
-				74CA40F52CCA319800B1832A /* Release */,
+				744CDB722CEB684F004867CF /* Debug */,
+				744CDB732CEB684F004867CF /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		74CA40F62CCA319800B1832A /* Build configuration list for PBXNativeTarget "MIDIStreamerRemote" */ = {
+		744CDB742CEB684F004867CF /* Build configuration list for PBXNativeTarget "bla" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				74CA40F72CCA319800B1832A /* Debug */,
-				74CA40F82CCA319800B1832A /* Release */,
+				744CDB752CEB684F004867CF /* Debug */,
+				744CDB762CEB684F004867CF /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
-	rootObject = 74CA40E02CCA319700B1832A /* Project object */;
+	rootObject = 744CDB5E2CEB684E004867CF /* Project object */;
 }
