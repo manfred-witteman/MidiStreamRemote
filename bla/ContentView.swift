@@ -15,50 +15,69 @@ struct ContentView: View {
         SceneSource(id: 7, sourceName: "Webcam Feed", inputKind: "unknown", sceneItemEnabled: true, level: Double.random(in: 0...1))
     ]
     
+    @State private var isRecording: Bool = false
+    
+    // Define the gradient colors dynamically
+    @State private var backgroundGradientColors: [Color] = [.blue, .red]
+    
     var body: some View {
-        NavigationView {
-            ZStack {
-                ScrollView {
-                    LazyVGrid(columns: gridItemLayout, spacing: 8) {
-                        ForEach($sceneSources, id: \.id) { $sceneSource in
-                            LampButton(
-                                showOverlay: $showOverlay,
-                                selectedSource: $selectedSource,
-                                sceneSource: $sceneSource,
-                                highlightColor: sceneSource.getColor()
-                            )
+        ZStack {
+            NavigationView {
+                VStack {
+                    // ScrollView content inside a container to align with the grid
+                    ScrollView {
+                        LazyVGrid(columns: gridItemLayout, spacing: 8) {
+                            ForEach($sceneSources, id: \.id) { $sceneSource in
+                                LampButton(
+                                    showOverlay: $showOverlay,
+                                    selectedSource: $selectedSource,
+                                    sceneSource: $sceneSource,
+                                    highlightColor: sceneSource.getColor()
+                                )
+                            }
                         }
+                        .padding(.horizontal)
+                        .padding(.top, 100)
+                        .opacity(showOverlay ? 0 : 1)
                     }
-                    .padding(.horizontal)
-                    .padding(.top, 100)
-                    .opacity(showOverlay ? 0 : 1)
-                }
-                .navigationTitle("Scene 1: commercial break")
-                .navigationBarTitleDisplayMode(.inline)
-                
-                if showOverlay, let selectedSourceIndex = sceneSources.firstIndex(where: { $0.id == selectedSource?.id }) {
-                    OverlayView(
-                        showOverlay: $showOverlay,
-                        source: $sceneSources[selectedSourceIndex]
-                    )
-                    .transition(.opacity)
-                    .zIndex(1)
-                }
+                    .navigationTitle("Scene 1: commercial break")
+                    .navigationBarTitleDisplayMode(.inline)
                     
-            }
-            .animation(.default.speed(1), value: showOverlay)
-            .onAppear {
-                previousSceneSources = sceneSources
-            }
-            .background(
-                LinearGradient(
-                    gradient: Gradient(colors: [.blue, .red]),
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
+                    // Bottom Tab Bar positioned at the bottom, aligned with the grid
+                    BottomTabBar(isRecording: $isRecording)
+                        .padding(.bottom, 16) // Optional padding
+                        .frame(maxWidth: .infinity) // Ensures the tab bar fills horizontally within the VStack
+                        .frame(width: UIScreen.main.bounds.width * 0.9) // Make it 90% of the screen width or align it with the grid
+                        .zIndex(2) // Ensure it's on top of other content
+                }
+                .animation(.default.speed(1), value: showOverlay)
+                .onAppear {
+                    previousSceneSources = sceneSources
+                }
+                .background(
+                    LinearGradient(
+                        gradient: Gradient(colors: backgroundGradientColors),
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                    //.animation( .easeInOut, value: isRecording )
                 )
-            )
-            .ignoresSafeArea(edges: .all)
-            .navigationBarHidden(showOverlay)
+                .ignoresSafeArea(edges: .all)
+                .navigationBarHidden(showOverlay)
+            }
+            
+           
+
+            // Overlay content when needed
+            if showOverlay, let selectedSourceIndex = sceneSources.firstIndex(where: { $0.id == selectedSource?.id }) {
+                OverlayView(
+                    showOverlay: $showOverlay,
+                    source: $sceneSources[selectedSourceIndex]
+                )
+                .frame(maxWidth: .infinity, alignment: .top) // Ensures it's aligned to the top
+                .transition(.opacity)
+                .zIndex(1) // Ensure it appears above other views
+            }
         }
     }
 
@@ -72,7 +91,6 @@ struct ContentView: View {
         }
     }
 }
-
 
 #Preview {
     ContentView()
