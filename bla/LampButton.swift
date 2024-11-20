@@ -58,21 +58,18 @@ struct LampButton: View {
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
                 }
-                .animation(.easeInOut(duration: 0.15), value: sceneSource.sceneItemEnabled)
-                
-                
                 .padding(.trailing, 10)
             }
         }
-        
+        .animation(.easeInOut, value: sceneSource.sceneItemEnabled)
     }
-    
-    func sendAPIRequest(for sceneSource: SceneSource) {
-            // Your API request logic here
-            print("Sending API request for \(sceneSource.sourceName) with level \(sceneSource.level)")
-        }
-    
 
+//    func sendAPIRequest(for sceneSource: SceneSource) {
+//        // Send the API request here (log for testing)
+//        print("Sending API request for \(sceneSource.sourceName) with level \(sceneSource.level)")
+//    }
+
+  
     func getIcon(for item: SceneSource) -> String {
         switch item.inputKind {
         case "slideshow_v2":

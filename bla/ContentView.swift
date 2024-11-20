@@ -3,7 +3,6 @@ import SwiftUI
 struct ContentView: View {
     private var gridItemLayout = [GridItem(.adaptive(minimum: 160))]
     
-    @State private var previousSceneSources: [SceneSource] = []
     @State private var showOverlay: Bool = false
     @State private var selectedSource: SceneSource? = nil
     @State private var sceneSources: [SceneSource] = [
@@ -45,19 +44,8 @@ struct ContentView: View {
                     .zIndex(1)
                 }
             }
-            .onAppear {
-                previousSceneSources = sceneSources
-            }
-            .onChange(of: sceneSources) { updatedSources, _ in
-                // Compare with the previous state and identify changes
-                for (index, updatedSource) in updatedSources.enumerated() {
-                    let previousSource = previousSceneSources[index]
-                    if previousSource != updatedSource {
-                        sendAPIRequest(for: updatedSource) // Send API request for the changed source
-                    }
-                }
-                // Update the previous state
-                previousSceneSources = updatedSources
+            .onChange(of: sceneSources) {
+                sendAPIRequest(for: sceneSources)
             }
             .background(
                 LinearGradient(
@@ -69,12 +57,11 @@ struct ContentView: View {
             .ignoresSafeArea(edges: .all)
         }
     }
-    
-    
+
     func sendAPIRequest(for sceneSource: SceneSource) {
         print("Sending API request for \(sceneSource.sourceName) with level \(sceneSource.level)")
     }
-    
+
     func sendAPIRequest(for sceneSources: [SceneSource]) {
         for source in sceneSources {
             print("Sending API request for \(source.sourceName) with level \(source.level)")
