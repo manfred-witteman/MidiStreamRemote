@@ -1,9 +1,12 @@
 import SwiftUI
+import Combine // Add this import for `Cancellable` if needed
 
 struct OverlayView: View {
     @Binding var showOverlay: Bool
     @Binding var source: SceneSource // Bind the specific SceneSource
     
+    @State private var debounceTimer: DispatchWorkItem? = nil // Use DispatchWorkItem instead of Cancellable
+
     var body: some View {
         VStack {
             Spacer()
@@ -27,8 +30,34 @@ struct OverlayView: View {
         .onTapGesture {
             showOverlay = false
         }
+        // Listen for changes to 'level' and trigger API call with debounce
+        .onChange(of: source.level) {
+            debounceAPIRequest(for: source)
+        }
+    }
+
+    func sendAPIRequest(for sceneSource: SceneSource) {
+        // Send the API request here (log for testing)
+        print("Sending API request for \(sceneSource.sourceName) with level \(sceneSource.level)")
+    }
+
+    private func debounceAPIRequest(for sceneSource: SceneSource) {
+        // Cancel previous debounce timer if any
+        debounceTimer?.cancel()
+        
+        // Start a new debounce timer with a delay of 0.5 seconds (adjustable)
+        debounceTimer = DispatchWorkItem {
+            sendAPIRequest(for: sceneSource) // Send the API request after the delay
+        }
+        
+        // Schedule the work item on the main queue after the delay
+        if let debounceTimer = debounceTimer {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1, execute: debounceTimer)
+        }
     }
 }
+
+
 
 #Preview {
     ContentView()

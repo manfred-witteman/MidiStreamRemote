@@ -1,10 +1,6 @@
 import SwiftUI
 import UIKit // Import UIKit for haptic feedback
 
-import SwiftUI
-import UIKit // Import UIKit for haptic feedback
-
-// LampButton that accepts individual SceneSource with Binding
 struct LampButton: View {
     @Binding var showOverlay: Bool
     @Binding var selectedSource: SceneSource?
@@ -42,6 +38,7 @@ struct LampButton: View {
                     .onTapGesture {
                         // When tapping on the circle, toggle the sceneItemEnabled state
                         sceneSource.sceneItemEnabled.toggle()
+                        sendAPIRequest(for: sceneSource) // Send API request when toggling
                         generateHapticFeedback()
                     }
 
@@ -56,20 +53,15 @@ struct LampButton: View {
                             .font(.caption)
                             .foregroundColor(sceneSource.sceneItemEnabled ? .gray : .white.opacity(0.7))
                     }
+                    .animation(.easeInOut(duration: 0.1), value: sceneSource.sceneItemEnabled)
                     .frame(maxWidth: .infinity, alignment: .leading)
                 }
+                
                 .padding(.trailing, 10)
             }
         }
-        .animation(.easeInOut, value: sceneSource.sceneItemEnabled)
     }
 
-//    func sendAPIRequest(for sceneSource: SceneSource) {
-//        // Send the API request here (log for testing)
-//        print("Sending API request for \(sceneSource.sourceName) with level \(sceneSource.level)")
-//    }
-
-  
     func getIcon(for item: SceneSource) -> String {
         switch item.inputKind {
         case "slideshow_v2":
@@ -91,5 +83,10 @@ struct LampButton: View {
 
     func generateHapticFeedback() {
         hapticGenerator.impactOccurred() // Trigger the haptic feedback
+    }
+
+    func sendAPIRequest(for sceneSource: SceneSource) {
+        // Send the API request here (log for testing)
+        print("Sending API request for \(sceneSource.sourceName) because the state is toggled")
     }
 }
