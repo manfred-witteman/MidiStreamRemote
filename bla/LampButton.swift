@@ -34,6 +34,7 @@ struct LampButton: View {
                             .frame(width: 24, height: 24)
                             .foregroundColor(sceneSource.sceneItemEnabled ? .white : .yellow)
                     }
+                    .animation(.easeInOut(duration: 0.1), value: sceneSource.sceneItemEnabled)
                     .padding(.leading, 15)
                     .onTapGesture {
                         // When tapping on the circle, toggle the sceneItemEnabled state
@@ -53,7 +54,7 @@ struct LampButton: View {
                             .font(.caption)
                             .foregroundColor(sceneSource.sceneItemEnabled ? .gray : .white.opacity(0.7))
                     }
-                    .animation(.easeInOut(duration: 0.1), value: sceneSource.sceneItemEnabled)
+                   
                     .frame(maxWidth: .infinity, alignment: .leading)
                 }
                 

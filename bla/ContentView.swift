@@ -55,6 +55,7 @@ struct ContentView: View {
                 )
             )
             .ignoresSafeArea(edges: .all)
+            .navigationBarHidden(showOverlay) 
         }
     }
 
