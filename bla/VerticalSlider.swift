@@ -28,6 +28,8 @@ struct VerticalSlider: View {
     // Caller can optionally proivde this for long press handling
     var onLongPress: (() -> ())? = nil
     var icon: ((Double) -> Image)? = nil
+    var iconColor: Color = Color(red: 70/255, green: 70/255, blue: 70/255)
+    
 
     // We want the slider to not jump to where the first touch land, just follow drag movement
     // So remember where the slider value is on first touch, then just adjust slider value relative
@@ -67,9 +69,10 @@ struct VerticalSlider: View {
                 if self.icon != nil {
                     self.icon!(self.value)
                         .font(.system(size: geometry.size.width / 3.0, weight: .regular, design: .default))
-                        .foregroundColor(Color(red: 70/255, green: 70/255, blue: 70/255))
+                        .foregroundColor(iconColor)
                         .offset(y: -geometry.size.height / 5.0)
-                        .animation(.easeIn(duration: 1))
+                        .animation(.easeIn(duration: 1), value: self.value)
+                        
                 }
             }
             .cornerRadius(geometry.size.width/3.3)

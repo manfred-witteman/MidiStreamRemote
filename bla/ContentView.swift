@@ -24,7 +24,8 @@ struct ContentView: View {
                             LampButton(
                                 showOverlay: $showOverlay,
                                 selectedSource: $selectedSource,
-                                sceneSource: $sceneSource
+                                sceneSource: $sceneSource,
+                                highlightColor: sceneSource.getColor()
                             )
                         }
                     }
@@ -43,7 +44,9 @@ struct ContentView: View {
                     .transition(.opacity)
                     .zIndex(1)
                 }
+                    
             }
+            .animation(.default.speed(1), value: showOverlay)
             .onAppear {
                 previousSceneSources = sceneSources
             }
@@ -55,7 +58,7 @@ struct ContentView: View {
                 )
             )
             .ignoresSafeArea(edges: .all)
-            .navigationBarHidden(showOverlay) 
+            .navigationBarHidden(showOverlay)
         }
     }
 

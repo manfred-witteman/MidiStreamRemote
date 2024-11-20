@@ -6,7 +6,7 @@ struct OverlayView: View {
     @Binding var source: SceneSource // Bind the specific SceneSource
     
     @State private var debounceTimer: DispatchWorkItem? = nil // Use DispatchWorkItem instead of Cancellable
-
+    
     var body: some View {
         VStack {
             Spacer()
@@ -19,8 +19,20 @@ struct OverlayView: View {
                 .padding(.bottom, 20)
             
             // Bind the slider directly to source.level
-            VerticalSlider(value: $source.level)
-                .frame(width: 170, height: 400)
+            
+            
+            VerticalSlider(
+                value: $source.level,
+                icon: { value in
+                    if value > 0.5 {
+                        return Image(systemName: source.getIcon(filled: true)) // Bright lamp
+                    } else {
+                        return Image(systemName: source.getIcon(filled: false)) // Dim lamp
+                    }
+                },
+                iconColor: source.getColor()
+            )
+            .frame(width: 170, height: 400)
             
             Spacer()
         }
@@ -35,12 +47,12 @@ struct OverlayView: View {
             debounceAPIRequest(for: source)
         }
     }
-
+    
     func sendAPIRequest(for sceneSource: SceneSource) {
         // Send the API request here (log for testing)
         print("Sending API request for \(sceneSource.sourceName) with level \(sceneSource.level)")
     }
-
+    
     private func debounceAPIRequest(for sceneSource: SceneSource) {
         // Cancel previous debounce timer if any
         debounceTimer?.cancel()

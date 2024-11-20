@@ -7,6 +7,9 @@ struct LampButton: View {
     @Binding var sceneSource: SceneSource
 
     private let hapticGenerator = UIImpactFeedbackGenerator(style: .medium)
+    
+    // Add a parameter for the customizable color
+    var highlightColor: Color = .yellow
 
     var body: some View {
         Button(action: {
@@ -25,14 +28,14 @@ struct LampButton: View {
                     // Left half: Icon inside a circle, anchored to the left edge
                     ZStack {
                         Circle()
-                            .fill(sceneSource.sceneItemEnabled ? Color.yellow : Color.black.opacity(0.3))
+                            .fill(sceneSource.sceneItemEnabled ? highlightColor : Color.black.opacity(0.3))
                             .frame(width: 40, height: 40)
 
-                        Image(systemName: getIcon(for: sceneSource))
+                        Image(systemName: sceneSource.getIcon())
                             .resizable()
                             .scaledToFit()
                             .frame(width: 24, height: 24)
-                            .foregroundColor(sceneSource.sceneItemEnabled ? .white : .yellow)
+                            .foregroundColor(sceneSource.sceneItemEnabled ? .white : highlightColor)
                     }
                     .animation(.easeInOut(duration: 0.1), value: sceneSource.sceneItemEnabled)
                     .padding(.leading, 15)
@@ -60,25 +63,6 @@ struct LampButton: View {
                 
                 .padding(.trailing, 10)
             }
-        }
-    }
-
-    func getIcon(for item: SceneSource) -> String {
-        switch item.inputKind {
-        case "slideshow_v2":
-            return "photo.stack"
-        case "ffmpeg_source":
-            return "waveform"
-        case "sck_audio_capture":
-            return "microphone"
-        case "color_source_v3":
-            return "paintpalette.fill"
-        case "image_source":
-            return "photo"
-        case "text_ft2_source_v2":
-            return "textformat.characters.dottedunderline"
-        default:
-            return "camera.metering.unknown"
         }
     }
 
