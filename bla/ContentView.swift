@@ -12,7 +12,8 @@ struct ContentView: View {
         SceneSource(id: 4, sourceName: "Color Overlay", inputKind: "color_source_v3", sceneItemEnabled: true, level: Double.random(in: 0...1)),
         SceneSource(id: 5, sourceName: "Logo Image", inputKind: "image_source", sceneItemEnabled: true, level: Double.random(in: 0...1)),
         SceneSource(id: 6, sourceName: "Overlay Text", inputKind: "text_ft2_source_v2", sceneItemEnabled: true, level: Double.random(in: 0...1)),
-        SceneSource(id: 7, sourceName: "Webcam Feed", inputKind: "unknown", sceneItemEnabled: true, level: Double.random(in: 0...1))
+        SceneSource(id: 7, sourceName: "Webcam Feed", inputKind: "unknown", sceneItemEnabled: true, level: Double.random(in: 0...1)),
+        SceneSource(id: 8, sourceName: "Slideshow Presentation", inputKind: "slideshow_v2", sceneItemEnabled: true, level: Double.random(in: 0...1))
     ]
     
     @State private var isRecording: Bool = false
@@ -53,6 +54,12 @@ struct ContentView: View {
                         .padding(.horizontal)
                         .padding(.top, 160)
                         .opacity(showOverlay ? 0 : 1)
+                    }
+                    .onChange(of: sceneSources) {
+                        sceneSources.sort { $0.inputKind < $1.inputKind }
+                    }
+                    .onAppear {
+                        sceneSources.sort { $0.inputKind < $1.inputKind }
                     }
                     .navigationTitle("Scene 1")
                     .navigationBarTitleDisplayMode(.automatic)
