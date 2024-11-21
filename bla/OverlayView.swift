@@ -12,6 +12,8 @@ struct OverlayView: View {
             Text("\(source.sourceName)")
                 .font(.largeTitle)
                 .fontWeight(.semibold)
+                .lineLimit(1) // Ensures the text is confined to one line
+                .truncationMode(.tail) // Truncates with "..." at the end if it doesn't fit
                 .padding(.bottom, 5)
             Text("\(Int(source.level * 100))%") // Display level as percentage
                 .font(.title2)
