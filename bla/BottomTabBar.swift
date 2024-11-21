@@ -41,6 +41,7 @@ struct BottomTabBar: View {
                 triggerHapticFeedback() // Trigger haptic feedback on tap
                 // Toggle the recording state
                 isRecording.toggle()
+                print(isRecording)
                 print(isRecording ? "Recording started" : "Recording stopped")
                 // Add any additional action here (e.g., start/stop recording)
             }) {

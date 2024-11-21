@@ -16,13 +16,27 @@ struct ContentView: View {
     ]
     
     @State private var isRecording: Bool = false
+    @State private var redOpacity: Double = 0.0
     
     // Define the gradient colors dynamically
     @State private var backgroundGradientColors: [Color] = [.blue, .red]
     
     var body: some View {
-        ZStack {
-            NavigationView {
+        NavigationView {
+            GeometryReader { geometry in
+                            // Background Image
+                            Image("tv")
+                                .resizable()
+                                .scaledToFill() // Image fills the space without stretching
+                                //.frame(width: geometry.size.width, height: geometry.size.height)
+                                .clipped() // Ensures the image doesn't overflow the edges
+                                .ignoresSafeArea()
+                                .opacity(0.8)
+                // Red overlay
+                Color.red
+                    .opacity(redOpacity) // Use the redOpacity state for dynamic opacity
+                    .ignoresSafeArea()
+                
                 VStack {
                     // ScrollView content inside a container to align with the grid
                     ScrollView {
@@ -37,57 +51,71 @@ struct ContentView: View {
                             }
                         }
                         .padding(.horizontal)
-                        .padding(.top, 100)
+                        .padding(.top, 160)
                         .opacity(showOverlay ? 0 : 1)
                     }
-                    .navigationTitle("Scene 1: commercial break")
-                    .navigationBarTitleDisplayMode(.inline)
+                    .navigationTitle("Scene 1")
+                    .navigationBarTitleDisplayMode(.automatic)
+            
+                    
                     
                     // Bottom Tab Bar positioned at the bottom, aligned with the grid
                     BottomTabBar(isRecording: $isRecording)
-                        .padding(.bottom, 16) // Optional padding
+                        .padding(.vertical, 20) // Optional padding
+                        .padding(.horizontal, 20)
                         .frame(maxWidth: .infinity) // Ensures the tab bar fills horizontally within the VStack
-                        .frame(width: UIScreen.main.bounds.width * 0.9) // Make it 90% of the screen width or align it with the grid
                         .zIndex(2) // Ensure it's on top of other content
+                }
+                
+                .onChange(of: isRecording) {
+                    handleRecordingChange(isRecording)
                 }
                 .animation(.default.speed(1), value: showOverlay)
                 .onAppear {
                     previousSceneSources = sceneSources
                 }
-                .background(
-                    LinearGradient(
-                        gradient: Gradient(colors: backgroundGradientColors),
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    )
-                    //.animation( .easeInOut, value: isRecording )
-                )
                 .ignoresSafeArea(edges: .all)
                 .navigationBarHidden(showOverlay)
-            }
-            
-           
-
-            // Overlay content when needed
-            if showOverlay, let selectedSourceIndex = sceneSources.firstIndex(where: { $0.id == selectedSource?.id }) {
-                OverlayView(
-                    showOverlay: $showOverlay,
-                    source: $sceneSources[selectedSourceIndex]
-                )
-                .frame(maxWidth: .infinity, alignment: .top) // Ensures it's aligned to the top
-                .transition(.opacity)
-                .zIndex(1) // Ensure it appears above other views
+                
+                
+                // Overlay content when needed
+                if showOverlay, let selectedSourceIndex = sceneSources.firstIndex(where: { $0.id == selectedSource?.id }) {
+                    OverlayView(
+                        showOverlay: $showOverlay,
+                        source: $sceneSources[selectedSourceIndex]
+                    )
+                    .frame(maxWidth: .infinity, alignment: .top) // Ensures it's aligned to the top
+                    .transition(.opacity)
+                    .zIndex(1)
+                }
             }
         }
     }
-
+    
+    
+    
     func sendAPIRequest(for sceneSource: SceneSource) {
         print("Sending API request for \(sceneSource.sourceName) with level \(sceneSource.level)")
     }
-
+    
     func sendAPIRequest(for sceneSources: [SceneSource]) {
         for source in sceneSources {
             print("Sending API request for \(source.sourceName) with level \(source.level)")
+        }
+    }
+    
+    
+    private func handleRecordingChange(_ isRecording: Bool) {
+        if isRecording {
+            // Start pulsating animation
+            withAnimation(Animation.easeInOut(duration: 1).repeatForever(autoreverses: true)) {
+                redOpacity = 0.8
+            }
+        } else {
+            // Stop pulsating animation
+            withAnimation {
+                redOpacity = 0.0
+            }
         }
     }
 }

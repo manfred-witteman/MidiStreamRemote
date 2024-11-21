@@ -9,14 +9,14 @@ struct OverlayView: View {
     
     var body: some View {
         VStack {
-            Spacer()
             Text("\(source.sourceName)")
                 .font(.largeTitle)
+                .fontWeight(.semibold)
                 .padding(.bottom, 5)
             Text("\(Int(source.level * 100))%") // Display level as percentage
                 .font(.title2)
-                .foregroundColor(.mint)
-                .padding(.bottom, 20)
+                .foregroundColor(source.getColor())
+                .padding(.bottom, 40)
             
             // Bind the slider directly to source.level
             
@@ -32,10 +32,11 @@ struct OverlayView: View {
                 },
                 iconColor: source.getColor()
             )
-            .frame(width: 170, height: 400)
+            .frame(width: 132, height: 400)
             
             Spacer()
         }
+        .padding(.top, 130)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color.black.opacity(0.4))
         .edgesIgnoringSafeArea(.all)

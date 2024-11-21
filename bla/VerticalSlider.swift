@@ -75,7 +75,7 @@ struct VerticalSlider: View {
                         
                 }
             }
-            .cornerRadius(geometry.size.width/3.3)
+            .cornerRadius(geometry.size.width/4.5)
             .gesture(
                 self.onLongPress == nil ?
                     AnyGesture(self.gesture1(geometry: geometry).map { _ in () }) :
