@@ -13,8 +13,10 @@ struct OverlayView: View {
                 .font(.largeTitle)
                 .fontWeight(.semibold)
                 .lineLimit(1) // Ensures the text is confined to one line
-                .truncationMode(.tail) // Truncates with "..." at the end if it doesn't fit
+                .minimumScaleFactor(0.5) // Shrinks the text to 50% of its original size if needed
                 .padding(.bottom, 5)
+                .padding(.horizontal, 10)
+           
             Text("\(Int(source.level * 100))%") // Display level as percentage
                 .font(.title2)
                 .foregroundColor(source.getColor())

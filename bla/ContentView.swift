@@ -4,7 +4,9 @@ struct ContentView: View {
     private var gridItemLayout = [GridItem(.adaptive(minimum: 160))]
     @State private var previousSceneSources: [SceneSource] = []
     @State private var showOverlay: Bool = false
+    @State private var currentSceneIndex: Int = 0
     @State private var selectedSource: SceneSource? = nil
+    @State private var sceneName: String = "Scene 1" // State to hold the scene name
     @State private var sceneSources: [SceneSource] = [
         SceneSource(id: 1, sourceName: "Slideshow Presentation", inputKind: "slideshow_v2", sceneItemEnabled: true, level: Double.random(in: 0...1)),
         SceneSource(id: 2, sourceName: "Vampire", inputKind: "ffmpeg_source", sceneItemEnabled: true, level: Double.random(in: 0...1)),
@@ -61,13 +63,17 @@ struct ContentView: View {
                     .onAppear {
                         sceneSources.sort { $0.inputKind < $1.inputKind }
                     }
-                    .navigationTitle("Scene 1")
+                    .navigationTitle(sceneName)
                     .navigationBarTitleDisplayMode(.automatic)
             
                     
                     
                     // Bottom Tab Bar positioned at the bottom, aligned with the grid
-                    BottomTabBar(isRecording: $isRecording)
+                    BottomTabBar(
+                        isRecording: $isRecording,
+                        onRewind: rewindScene,
+                        onForward: forwardScene
+                    )
                         .padding(.vertical, 20) // Optional padding
                         .padding(.horizontal, 20)
                         .frame(maxWidth: .infinity) // Ensures the tab bar fills horizontally within the VStack
@@ -99,28 +105,48 @@ struct ContentView: View {
             }
         }
     }
+    
+    // Scene navigation logic
+       private func rewindScene() {
+           print("rewinding scene")
+//           if currentSceneIndex > 0 {
+//               currentSceneIndex -= 1
+//           }
+       }
+       
+       private func forwardScene() {
+           print("forwarding scene")
+//           if currentSceneIndex < SceneData.scenes.count - 1 {
+//               currentSceneIndex += 1
+//           }
+       }
 
         // Mock API response function
     func mockAPIResponse() {
-        // Simulate a delay, as you would with a real API call
-        DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-            let newSceneSources: [SceneSource] = [
-                SceneSource(id: 1, sourceName: "Cosmic Slideshow", inputKind: "slideshow_v2", sceneItemEnabled: true, level: Double.random(in: 0...1)),
-                SceneSource(id: 2, sourceName: "Vampire Bat Beats", inputKind: "ffmpeg_source", sceneItemEnabled: true, level: Double.random(in: 0...1)),
-                SceneSource(id: 3, sourceName: "Laser Microphone", inputKind: "sck_audio_capture", sceneItemEnabled: true, level: Double.random(in: 0...1)),
-                SceneSource(id: 4, sourceName: "Electric Color Burst", inputKind: "color_source_v3", sceneItemEnabled: true, level: Double.random(in: 0...1)),
-                SceneSource(id: 5, sourceName: "Meme Generator", inputKind: "image_source", sceneItemEnabled: true, level: Double.random(in: 0...1)),
-                SceneSource(id: 6, sourceName: "Disco Overlay Text", inputKind: "text_ft2_source_v2", sceneItemEnabled: false, level: Double.random(in: 0...1)),
-                SceneSource(id: 7, sourceName: "Giant Robot Webcam", inputKind: "unknown", sceneItemEnabled: true, level: Double.random(in: 0...1)),
-                SceneSource(id: 8, sourceName: "Space Funk Imperial March", inputKind: "ffmpeg_source", sceneItemEnabled: true, level: Double.random(in: 0...1)),
-                SceneSource(id: 9, sourceName: "Zombie Apocalypse Slideshow", inputKind: "slideshow_v2", sceneItemEnabled: true, level: Double.random(in: 0...1)),
-                SceneSource(id: 10, sourceName: "Dragon Roar Audio", inputKind: "sck_audio_capture", sceneItemEnabled: false, level: Double.random(in: 0...1))
-            ]
-            
-            // Update the sceneSources with the new data
-            sceneSources = newSceneSources
+            // Simulate a delay, as you would with a real API call
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                let newAPIResponse = APIResponse(
+                    sceneName: "Scene 2",
+                    sources: [
+                        SceneSource(id: 1, sourceName: "Cosmic Slideshow", inputKind: "slideshow_v2", sceneItemEnabled: true, level: Double.random(in: 0...1)),
+                        SceneSource(id: 2, sourceName: "Vampire Bat Beats", inputKind: "ffmpeg_source", sceneItemEnabled: true, level: Double.random(in: 0...1)),
+                        SceneSource(id: 3, sourceName: "Laser Microphone", inputKind: "sck_audio_capture", sceneItemEnabled: true, level: Double.random(in: 0...1)),
+                        SceneSource(id: 4, sourceName: "Electric Color Burst", inputKind: "color_source_v3", sceneItemEnabled: true, level: Double.random(in: 0...1)),
+                        SceneSource(id: 5, sourceName: "Meme Generator", inputKind: "image_source", sceneItemEnabled: true, level: Double.random(in: 0...1)),
+                        SceneSource(id: 6, sourceName: "Disco Overlay Text", inputKind: "text_ft2_source_v2", sceneItemEnabled: false, level: Double.random(in: 0...1)),
+                        SceneSource(id: 7, sourceName: "Giant Robot Webcam", inputKind: "unknown", sceneItemEnabled: true, level: Double.random(in: 0...1)),
+                        SceneSource(id: 8, sourceName: "Space Funk Imperial March", inputKind: "ffmpeg_source", sceneItemEnabled: true, level: Double.random(in: 0...1)),
+                        SceneSource(id: 9, sourceName: "Zombie Apocalypse Slideshow", inputKind: "slideshow_v2", sceneItemEnabled: true, level: Double.random(in: 0...1)),
+                        SceneSource(id: 10, sourceName: "Dragon Roar Audio", inputKind: "sck_audio_capture", sceneItemEnabled: false, level: Double.random(in: 0...1))
+                    ]
+                )
+                
+                // Update the sceneSources and sceneName with the new data from the API response
+                sceneSources = newAPIResponse.sources
+                sceneName = newAPIResponse.sceneName // Update the sceneName dynamically
+            }
         }
-    }
+        
     
     
     
