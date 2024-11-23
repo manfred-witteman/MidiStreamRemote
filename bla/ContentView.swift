@@ -107,19 +107,24 @@ struct ContentView: View {
     }
     
     // Scene navigation logic
-       private func rewindScene() {
-           print("rewinding scene")
-//           if currentSceneIndex > 0 {
-//               currentSceneIndex -= 1
-//           }
-       }
-       
-       private func forwardScene() {
-           print("forwarding scene")
-//           if currentSceneIndex < SceneData.scenes.count - 1 {
-//               currentSceneIndex += 1
-//           }
-       }
+    // Scene navigation logic
+        private func rewindScene() {
+            guard currentSceneIndex > 0 else { return }
+            currentSceneIndex -= 1
+            updateScene()
+        }
+        
+        private func forwardScene() {
+            guard currentSceneIndex < MockScenes.sceneList.count - 1 else { return }
+            currentSceneIndex += 1
+            updateScene()
+        }
+        
+        private func updateScene() {
+            let currentScene = MockScenes.sceneList[currentSceneIndex]
+            sceneName = currentScene.sceneName
+            sceneSources = currentScene.sources
+        }
 
         // Mock API response function
     func mockAPIResponse() {
