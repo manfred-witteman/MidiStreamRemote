@@ -80,6 +80,7 @@ struct ContentView: View {
                 .animation(.default.speed(1), value: showOverlay)
                 .onAppear {
                     previousSceneSources = sceneSources
+                    mockAPIResponse()
                 }
                 .ignoresSafeArea(edges: .all)
                 .navigationBarHidden(showOverlay)
@@ -96,6 +97,28 @@ struct ContentView: View {
                     .zIndex(1)
                 }
             }
+        }
+    }
+
+        // Mock API response function
+    func mockAPIResponse() {
+        // Simulate a delay, as you would with a real API call
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+            let newSceneSources: [SceneSource] = [
+                SceneSource(id: 1, sourceName: "Cosmic Slideshow", inputKind: "slideshow_v2", sceneItemEnabled: true, level: Double.random(in: 0...1)),
+                SceneSource(id: 2, sourceName: "Vampire Bat Beats", inputKind: "ffmpeg_source", sceneItemEnabled: true, level: Double.random(in: 0...1)),
+                SceneSource(id: 3, sourceName: "Laser Microphone", inputKind: "sck_audio_capture", sceneItemEnabled: true, level: Double.random(in: 0...1)),
+                SceneSource(id: 4, sourceName: "Electric Color Burst", inputKind: "color_source_v3", sceneItemEnabled: true, level: Double.random(in: 0...1)),
+                SceneSource(id: 5, sourceName: "Meme Generator", inputKind: "image_source", sceneItemEnabled: true, level: Double.random(in: 0...1)),
+                SceneSource(id: 6, sourceName: "Disco Overlay Text", inputKind: "text_ft2_source_v2", sceneItemEnabled: false, level: Double.random(in: 0...1)),
+                SceneSource(id: 7, sourceName: "Giant Robot Webcam", inputKind: "unknown", sceneItemEnabled: true, level: Double.random(in: 0...1)),
+                SceneSource(id: 8, sourceName: "Space Funk Imperial March", inputKind: "ffmpeg_source", sceneItemEnabled: true, level: Double.random(in: 0...1)),
+                SceneSource(id: 9, sourceName: "Zombie Apocalypse Slideshow", inputKind: "slideshow_v2", sceneItemEnabled: true, level: Double.random(in: 0...1)),
+                SceneSource(id: 10, sourceName: "Dragon Roar Audio", inputKind: "sck_audio_capture", sceneItemEnabled: false, level: Double.random(in: 0...1))
+            ]
+            
+            // Update the sceneSources with the new data
+            sceneSources = newSceneSources
         }
     }
     
