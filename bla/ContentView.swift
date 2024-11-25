@@ -17,9 +17,20 @@ struct ContentView: View {
     var body: some View {
         NavigationView {
             GeometryReader { geometry in
+                // Background Image
+                Image("tv")
+                    .resizable()
+                    .scaledToFill()
+                    .clipped()
+                    .ignoresSafeArea()
+                    .opacity(0.8)
+                
+                // Red overlay
+                Color.red
+                    .opacity(redOpacity)
+                    .ignoresSafeArea()
                 ZStack {
-                    // Background Image and Red Overlay
-                    backgroundView()
+                    
                     
                     VStack {
                         // ScrollView content inside a container to align with the grid
@@ -120,7 +131,7 @@ struct ContentView: View {
     }
     
     // MARK: - Logic and API Simulation
-
+    
     private func simulateAPIUpdate() {
         let simulatedResponse = APIResponse(
             sceneIndex: 0, // Assuming you want to update "Scene 1"
@@ -131,7 +142,7 @@ struct ContentView: View {
         )
         sceneStore.sceneList[simulatedResponse.sceneIndex] = simulatedResponse
     }
-
+    
     private func simulateDynamicAPIUpdate(sceneIndex: Int, changedItem: SceneItem) {
         // Simulate a delay to mimic a real API response
         DispatchQueue.global().asyncAfter(deadline: .now() + 1.0) {
@@ -183,7 +194,7 @@ struct ContentView: View {
             selectedSource = sceneSources.first { $0.id == selectedSourceID }
         }
     }
-  
+    
     private func handleRecordingChange(_ isRecording: Bool) {
         if isRecording {
             // Start pulsating animation
