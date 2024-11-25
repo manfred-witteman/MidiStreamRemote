@@ -3,8 +3,8 @@ import UIKit // Import UIKit for haptic feedback
 
 struct LampButton: View {
     @Binding var showOverlay: Bool
-    @Binding var selectedSource: SceneSource?
-    @Binding var sceneSource: SceneSource
+    @Binding var selectedSource: SceneItem?
+    @Binding var sceneSource: SceneItem
 
     private let hapticGenerator = UIImpactFeedbackGenerator(style: .medium)
     
@@ -70,7 +70,7 @@ struct LampButton: View {
         hapticGenerator.impactOccurred() // Trigger the haptic feedback
     }
 
-    func sendAPIRequest(for sceneSource: SceneSource) {
+    func sendAPIRequest(for sceneSource: SceneItem) {
         // Send the API request here (log for testing)
         print("Sending API request for \(sceneSource.sourceName) because the state is toggled")
     }

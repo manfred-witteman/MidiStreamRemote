@@ -1,21 +1,18 @@
 import SwiftUI
 
 struct ContentView: View {
-    private var gridItemLayout = [GridItem(.adaptive(minimum: 160))]
-    @State private var previousSceneSources: [SceneSource] = []
+    @StateObject private var sceneStore = SceneStore() // Use SceneStore for managing scenes
+    @State private var previousSceneSources: [SceneItem] = []
     @State private var showOverlay: Bool = false
     @State private var currentSceneIndex: Int = 0
-    @State private var selectedSource: SceneSource? = nil
+    @State private var selectedSource: SceneItem? = nil
     @State private var sceneName: String = "Scene 1"
     
     // Load "Scene 1" directly as the initial data
-    @State private var sceneSources: [SceneSource] = MockScenes.sceneList[0].sources
+    @State private var sceneSources: [SceneItem] = MockScenes.sceneList[0].sources
     
     @State private var isRecording: Bool = false
     @State private var redOpacity: Double = 0.0
-    
-    // Define the gradient colors dynamically
-    @State private var backgroundGradientColors: [Color] = [.blue, .red]
     
     var body: some View {
         NavigationView {
@@ -35,8 +32,9 @@ struct ContentView: View {
                 
                 VStack {
                     // ScrollView content inside a container to align with the grid
+                    
                     ScrollView {
-                        LazyVGrid(columns: gridItemLayout, spacing: 8) {
+                        LazyVGrid(columns: [GridItem(.adaptive(minimum: 160))], spacing: 8) {
                             ForEach($sceneSources, id: \.id) { $sceneSource in
                                 LampButton(
                                     showOverlay: $showOverlay,
@@ -50,29 +48,28 @@ struct ContentView: View {
                         .padding(.top, 160)
                         .opacity(showOverlay ? 0 : 1)
                     }
-                    .onChange(of: sceneSources) {
-                        sceneSources.sort { $0.inputKind < $1.inputKind }
-                    }
                     .onAppear {
-                        sceneSources.sort { $0.inputKind < $1.inputKind }
+                        updateScene() // Initialize the scene data
                     }
                     .navigationTitle(sceneName)
                     .navigationBarTitleDisplayMode(.automatic)
                     
                     // Bottom Tab Bar positioned at the bottom, aligned with the grid
                     BottomTabBar(
-                        isRecording: $isRecording,
-                        onRewind: rewindScene,
-                        onForward: forwardScene
-                    )
+                                           isRecording: $isRecording,
+                                           canRewind: currentSceneIndex > 0,
+                                           canForward: currentSceneIndex < sceneStore.sceneList.count - 1,
+                                           onRewind: rewindScene,
+                                           onForward: forwardScene,
+                                           onSimulateAPIUpdate: simulateAPIUpdate // Add simulation action
+                                       )
                     .padding(.vertical, 20)
                     .padding(.horizontal, 20)
                     .frame(maxWidth: .infinity)
                     .zIndex(2)
                 }
-                .onChange(of: isRecording) {
-                    handleRecordingChange(isRecording)
-                }
+                .onChange(of: isRecording) { handleRecordingChange($0) }
+                .onChange(of: sceneStore.sceneList) { updateScene() } // React to changes in SceneStore
                 .animation(.default.speed(1), value: showOverlay)
                 .onAppear {
                     previousSceneSources = sceneSources
@@ -94,6 +91,17 @@ struct ContentView: View {
         }
     }
     
+    private func simulateAPIUpdate() {
+            let simulatedResponse = APIResponse(
+                sceneIndex: 0, // Assuming you want to update "Scene 1"
+                sceneName: "Scene 1",
+                sources: [
+                    SceneItem(id: 1, sourceName: "Slideshow Presentation", inputKind: "slideshow_v2", sceneItemEnabled: false, level: Double.random(in: 0...1))
+                ]
+            )
+            sceneStore.sceneList[simulatedResponse.sceneIndex] = simulatedResponse
+        }
+    
     // Scene navigation logic
     private func rewindScene() {
         guard currentSceneIndex > 0 else { return }
@@ -102,22 +110,28 @@ struct ContentView: View {
     }
     
     private func forwardScene() {
-        guard currentSceneIndex < MockScenes.sceneList.count - 1 else { return }
+        guard currentSceneIndex < sceneStore.sceneList.count - 1 else { return }
         currentSceneIndex += 1
         updateScene()
     }
     
     private func updateScene() {
-        let currentScene = MockScenes.sceneList[currentSceneIndex]
+        guard sceneStore.sceneList.indices.contains(currentSceneIndex) else { return }
+        let currentScene = sceneStore.sceneList[currentSceneIndex]
         sceneName = currentScene.sceneName
         sceneSources = currentScene.sources
+        
+        // If a selectedSource exists, update it as well
+        if let selectedSourceID = selectedSource?.id {
+            selectedSource = sceneSources.first { $0.id == selectedSourceID }
+        }
     }
     
-    func sendAPIRequest(for sceneSource: SceneSource) {
+    func sendAPIRequest(for sceneSource: SceneItem) {
         print("Sending API request for \(sceneSource.sourceName) with level \(sceneSource.level)")
     }
     
-    func sendAPIRequest(for sceneSources: [SceneSource]) {
+    func sendAPIRequest(for sceneSources: [SceneItem]) {
         for source in sceneSources {
             print("Sending API request for \(source.sourceName) with level \(source.level)")
         }
@@ -137,6 +151,7 @@ struct ContentView: View {
         }
     }
 }
+
 
 #Preview {
     ContentView()

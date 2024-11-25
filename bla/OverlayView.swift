@@ -3,7 +3,7 @@ import Combine // Add this import for `Cancellable` if needed
 
 struct OverlayView: View {
     @Binding var showOverlay: Bool
-    @Binding var source: SceneSource // Bind the specific SceneSource
+    @Binding var source: SceneItem // Bind the specific SceneSource
     
     @State private var debounceTimer: DispatchWorkItem? = nil // Use DispatchWorkItem instead of Cancellable
     
@@ -53,12 +53,12 @@ struct OverlayView: View {
         }
     }
     
-    func sendAPIRequest(for sceneSource: SceneSource) {
+    func sendAPIRequest(for sceneSource: SceneItem) {
         // Send the API request here (log for testing)
         print("Sending API request for \(sceneSource.sourceName) with level \(sceneSource.level)")
     }
     
-    private func debounceAPIRequest(for sceneSource: SceneSource) {
+    private func debounceAPIRequest(for sceneSource: SceneItem) {
         // Cancel previous debounce timer if any
         debounceTimer?.cancel()
         

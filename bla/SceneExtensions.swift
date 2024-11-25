@@ -1,6 +1,6 @@
 import SwiftUICore
 
-extension SceneSource {
+extension SceneItem {
     func getIcon(filled: Bool = false) -> String {
         let baseIcon: String
         switch self.inputKind {
@@ -25,7 +25,7 @@ extension SceneSource {
 }
 
 
-extension SceneSource {
+extension SceneItem {
     func getColor() -> Color {
         switch self.inputKind {
         case "slideshow_v2":
