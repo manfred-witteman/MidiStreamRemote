@@ -17,90 +17,147 @@ struct ContentView: View {
     var body: some View {
         NavigationView {
             GeometryReader { geometry in
-                // Background Image
-                Image("tv")
-                    .resizable()
-                    .scaledToFill()
-                    .clipped()
-                    .ignoresSafeArea()
-                    .opacity(0.8)
-                
-                // Red overlay
-                Color.red
-                    .opacity(redOpacity)
-                    .ignoresSafeArea()
-                
-                VStack {
-                    // ScrollView content inside a container to align with the grid
+                ZStack {
+                    // Background Image and Red Overlay
+                    backgroundView()
                     
-                    ScrollView {
-                        LazyVGrid(columns: [GridItem(.adaptive(minimum: 160))], spacing: 8) {
-                            ForEach($sceneSources, id: \.id) { $sceneSource in
-                                LampButton(
-                                    showOverlay: $showOverlay,
-                                    selectedSource: $selectedSource,
-                                    sceneSource: $sceneSource,
-                                    highlightColor: sceneSource.getColor()
-                                )
-                            }
-                        }
-                        .padding(.horizontal)
-                        .padding(.top, 160)
-                        .opacity(showOverlay ? 0 : 1)
+                    VStack {
+                        // ScrollView content inside a container to align with the grid
+                        sceneGrid()
+                        
+                        // Bottom Tab Bar positioned at the bottom, aligned with the grid
+                        bottomTabBar()
                     }
+                    .onChange(of: isRecording) { handleRecordingChange($0) }
+                    .onChange(of: sceneStore.sceneList) { updateScene() } // React to changes in SceneStore
+                    .animation(.default.speed(1), value: showOverlay)
                     .onAppear {
-                        updateScene() // Initialize the scene data
+                        previousSceneSources = sceneSources
                     }
-                    .navigationTitle(sceneName)
-                    .navigationBarTitleDisplayMode(.automatic)
+                    .ignoresSafeArea(edges: .all)
+                    .navigationBarHidden(showOverlay)
                     
-                    // Bottom Tab Bar positioned at the bottom, aligned with the grid
-                    BottomTabBar(
-                                           isRecording: $isRecording,
-                                           canRewind: currentSceneIndex > 0,
-                                           canForward: currentSceneIndex < sceneStore.sceneList.count - 1,
-                                           onRewind: rewindScene,
-                                           onForward: forwardScene,
-                                           onSimulateAPIUpdate: simulateAPIUpdate // Add simulation action
-                                       )
-                    .padding(.vertical, 20)
-                    .padding(.horizontal, 20)
-                    .frame(maxWidth: .infinity)
-                    .zIndex(2)
+                    // Overlay content when needed
+                    overlayView()
                 }
-                .onChange(of: isRecording) { handleRecordingChange($0) }
-                .onChange(of: sceneStore.sceneList) { updateScene() } // React to changes in SceneStore
-                .animation(.default.speed(1), value: showOverlay)
-                .onAppear {
-                    previousSceneSources = sceneSources
-                }
-                .ignoresSafeArea(edges: .all)
-                .navigationBarHidden(showOverlay)
-                
-                // Overlay content when needed
-                if showOverlay, let selectedSourceIndex = sceneSources.firstIndex(where: { $0.id == selectedSource?.id }) {
-                    OverlayView(
-                        showOverlay: $showOverlay,
-                        source: $sceneSources[selectedSourceIndex]
-                    )
-                    .frame(maxWidth: .infinity, alignment: .top)
-                    .transition(.opacity)
-                    .zIndex(1)
-                }
+                .environmentObject(sceneStore)  // Inject the SceneStore as an EnvironmentObject
             }
         }
     }
     
-    private func simulateAPIUpdate() {
-            let simulatedResponse = APIResponse(
-                sceneIndex: 0, // Assuming you want to update "Scene 1"
-                sceneName: "Scene 1",
-                sources: [
-                    SceneItem(id: 1, sourceName: "Slideshow Presentation", inputKind: "slideshow_v2", sceneItemEnabled: false, level: Double.random(in: 0...1))
-                ]
-            )
-            sceneStore.sceneList[simulatedResponse.sceneIndex] = simulatedResponse
+    // MARK: - View Components
+    
+    private func backgroundView() -> some View {
+        VStack {
+            // Background Image
+            Image("tv")
+                .resizable()
+                .scaledToFill()
+                .clipped()
+                .ignoresSafeArea()
+                .opacity(0.8)
+            
+            // Red overlay
+            Color.red
+                .opacity(redOpacity)
+                .ignoresSafeArea()
         }
+    }
+    
+    private func sceneGrid() -> some View {
+        ScrollView {
+            LazyVGrid(columns: [GridItem(.adaptive(minimum: 160))], spacing: 8) {
+                ForEach($sceneSources, id: \.id) { $sceneSource in
+                    LampButton(
+                        showOverlay: $showOverlay,
+                        currentSceneIndex: $currentSceneIndex,
+                        selectedSource: $selectedSource,
+                        sceneSource: $sceneSource,
+                        highlightColor: sceneSource.getColor()
+                    )
+                }
+            }
+            .padding(.horizontal)
+            .padding(.top, 160)
+            .opacity(showOverlay ? 0 : 1)
+        }
+        .onAppear {
+            updateScene() // Initialize the scene data
+        }
+        .navigationTitle(sceneName)
+        .navigationBarTitleDisplayMode(.automatic)
+    }
+    
+    private func bottomTabBar() -> some View {
+        BottomTabBar(
+            isRecording: $isRecording,
+            canRewind: currentSceneIndex > 0,
+            canForward: currentSceneIndex < sceneStore.sceneList.count - 1,
+            onRewind: rewindScene,
+            onForward: forwardScene,
+            onSimulateAPIUpdate: simulateAPIUpdate // Add simulation action
+        )
+        .padding(.vertical, 20)
+        .padding(.horizontal, 20)
+        .frame(maxWidth: .infinity)
+        .zIndex(2)
+    }
+    
+    private func overlayView() -> some View {
+        if showOverlay, let selectedSourceIndex = sceneSources.firstIndex(where: { $0.id == selectedSource?.id }) {
+            return AnyView(
+                OverlayView(
+                    showOverlay: $showOverlay,
+                    source: $sceneSources[selectedSourceIndex]
+                )
+                .frame(maxWidth: .infinity, alignment: .top)
+                .transition(.opacity)
+                .zIndex(1)
+            )
+        } else {
+            return AnyView(EmptyView())
+        }
+    }
+    
+    // MARK: - Logic and API Simulation
+
+    private func simulateAPIUpdate() {
+        let simulatedResponse = APIResponse(
+            sceneIndex: 0, // Assuming you want to update "Scene 1"
+            sceneName: "Scene 1",
+            sources: [
+                SceneItem(id: 1, sourceName: "Slideshow Presentation", inputKind: "slideshow_v2", sceneItemEnabled: false, level: Double.random(in: 0...1))
+            ]
+        )
+        sceneStore.sceneList[simulatedResponse.sceneIndex] = simulatedResponse
+    }
+
+    private func simulateDynamicAPIUpdate(sceneIndex: Int, changedItem: SceneItem) {
+        // Simulate a delay to mimic a real API response
+        DispatchQueue.global().asyncAfter(deadline: .now() + 1.0) {
+            DispatchQueue.main.async {
+                // Ensure the scene index is valid
+                guard sceneStore.sceneList.indices.contains(sceneIndex) else {
+                    print("Scene index \(sceneIndex) is out of bounds")
+                    return
+                }
+                
+                // Get the scene to update
+                var currentScene = sceneStore.sceneList[sceneIndex]
+                
+                // Find the SceneItem to update within the scene's sources
+                if let itemIndex = currentScene.sources.firstIndex(where: { $0.id == changedItem.id }) {
+                    currentScene.sources[itemIndex] = changedItem
+                    
+                    // Reassign the updated scene back to the scene list
+                    sceneStore.sceneList[sceneIndex] = currentScene
+                    print("Updated SceneItem \(changedItem.sourceName) in Scene \(currentScene.sceneName)")
+                } else {
+                    print("SceneItem with id \(changedItem.id) not found in Scene \(currentScene.sceneName)")
+                }
+            }
+        }
+    }
     
     // Scene navigation logic
     private func rewindScene() {
@@ -126,17 +183,7 @@ struct ContentView: View {
             selectedSource = sceneSources.first { $0.id == selectedSourceID }
         }
     }
-    
-    func sendAPIRequest(for sceneSource: SceneItem) {
-        print("Sending API request for \(sceneSource.sourceName) with level \(sceneSource.level)")
-    }
-    
-    func sendAPIRequest(for sceneSources: [SceneItem]) {
-        for source in sceneSources {
-            print("Sending API request for \(source.sourceName) with level \(source.level)")
-        }
-    }
-    
+  
     private func handleRecordingChange(_ isRecording: Bool) {
         if isRecording {
             // Start pulsating animation
@@ -151,7 +198,6 @@ struct ContentView: View {
         }
     }
 }
-
 
 #Preview {
     ContentView()

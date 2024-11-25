@@ -1,19 +1,20 @@
 import SwiftUI
-import UIKit // Import UIKit for haptic feedback
+import UIKit
 
 struct LampButton: View {
     @Binding var showOverlay: Bool
+    @Binding var currentSceneIndex: Int
     @Binding var selectedSource: SceneItem?
     @Binding var sceneSource: SceneItem
-
+    
+    @EnvironmentObject var sceneStore: SceneStore  // Get the SceneStore using @EnvironmentObject
+    
     private let hapticGenerator = UIImpactFeedbackGenerator(style: .medium)
     
-    // Add a parameter for the customizable color
     var highlightColor: Color = .yellow
 
     var body: some View {
         Button(action: {
-            // When tapping anywhere except the icon, show the overlay and set selected source
             selectedSource = sceneSource
             showOverlay.toggle()
             generateHapticFeedback()
@@ -25,7 +26,7 @@ struct LampButton: View {
                     .shadow(radius: sceneSource.sceneItemEnabled ? 5 : 0)
 
                 HStack(spacing: 10) {
-                    // Left half: Icon inside a circle, anchored to the left edge
+                    // Left half: Icon inside a circle
                     ZStack {
                         Circle()
                             .fill(sceneSource.sceneItemEnabled ? highlightColor : Color.black.opacity(0.3))
@@ -40,9 +41,9 @@ struct LampButton: View {
                     .animation(.easeInOut(duration: 0.1), value: sceneSource.sceneItemEnabled)
                     .padding(.leading, 15)
                     .onTapGesture {
-                        // When tapping on the circle, toggle the sceneItemEnabled state
+                        // Toggle sceneItemEnabled and update the scene store
                         sceneSource.sceneItemEnabled.toggle()
-                        sendAPIRequest(for: sceneSource) // Send API request when toggling
+                        sendAPIRequest(for: sceneSource)  // Send API request when toggling
                         generateHapticFeedback()
                     }
 
@@ -57,10 +58,7 @@ struct LampButton: View {
                             .font(.caption)
                             .foregroundColor(sceneSource.sceneItemEnabled ? .gray : .white.opacity(0.7))
                     }
-                   
-                    .frame(maxWidth: .infinity, alignment: .leading)
                 }
-                
                 .padding(.trailing, 10)
             }
         }
@@ -71,7 +69,14 @@ struct LampButton: View {
     }
 
     func sendAPIRequest(for sceneSource: SceneItem) {
-        // Send the API request here (log for testing)
+        // Log for testing
         print("Sending API request for \(sceneSource.sourceName) because the state is toggled")
+
+        let updatedItem = SceneItem(id: sceneSource.id, sourceName: sceneSource.sourceName, inputKind: sceneSource.inputKind, sceneItemEnabled: sceneSource.sceneItemEnabled, level: 22.1)
+        
+        let sceneIndex = currentSceneIndex
+        
+        // Call updateSceneItem method to update the scene in the store
+        sceneStore.updateSceneItem(sceneIndex: sceneIndex, updatedItem: updatedItem)
     }
 }

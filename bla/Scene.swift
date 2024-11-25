@@ -27,5 +27,5 @@ struct SceneItem: Identifiable, Equatable, Codable{
 struct APIResponse: Codable, Equatable {
     let sceneIndex: Int
     let sceneName: String
-    let sources: [SceneItem]
+    var sources: [SceneItem]
 }
