@@ -79,5 +79,6 @@ struct OverlayView: View {
 
 #Preview {
     let mockBonjourClient = BonjourClient() // Create a mock instance
-    ContentView(bonjourClient: mockBonjourClient)
+    ContentView()
+        .environmentObject(mockBonjourClient) // Inject it into the environment
 }

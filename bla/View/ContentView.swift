@@ -7,7 +7,8 @@ struct ContentView: View {
     @State private var currentSceneIndex: Int = 0
     @State private var selectedSource: SceneItem? = nil
     @State private var sceneName: String = "Scene 1"
-    @ObservedObject var bonjourClient: BonjourClient
+    @EnvironmentObject var bonjourClient: BonjourClient // Access from the environment
+
     
     
     // Load "Scene 1" directly as the initial data
@@ -214,5 +215,6 @@ struct ContentView: View {
 
 #Preview {
     let mockBonjourClient = BonjourClient() // Create a mock instance
-    ContentView(bonjourClient: mockBonjourClient)
+    ContentView()
+        .environmentObject(mockBonjourClient) // Inject it into the environment
 }

@@ -13,13 +13,14 @@ struct blaApp: App {
         @State private var showServiceDialog = true
     var body: some Scene {
         WindowGroup {
-                   ContentView(bonjourClient: bonjourClient)
-                       .onAppear {
-                           bonjourClient.startBrowsing()
-                       }
-                       .sheet(isPresented: $showServiceDialog) {
-                           ServiceSelectionDialog(bonjourClient: bonjourClient, isPresented: $showServiceDialog)
-                       }
-               }
+            ContentView()
+                .onAppear {
+                    bonjourClient.startBrowsing()
+                }
+                .sheet(isPresented: $showServiceDialog) {
+                    ServiceSelectionDialog(bonjourClient: bonjourClient, isPresented: $showServiceDialog)
+                }
+                .environmentObject(bonjourClient) // Inject the BonjourClient here
+        }
     }
 }

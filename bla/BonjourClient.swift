@@ -5,6 +5,7 @@ class BonjourClient: NSObject, ObservableObject, NetServiceDelegate, NetServiceB
     @Published var services: [NetService] = []
     @Published var isRecording: Bool = false
     @Published var virtualCameraActive: Bool = false
+    @Published var isUserConnecting: Bool = false
     
     private var netServiceBrowser: NetServiceBrowser?
     private var connection: NWConnection?
@@ -13,6 +14,8 @@ class BonjourClient: NSObject, ObservableObject, NetServiceDelegate, NetServiceB
     
     private let maxRetries = 3 // Maximum retry attempts
     private var currentRetries = 0 // Current retry count
+    
+    
     
     // Start browsing for services
     func startBrowsing() {
@@ -55,7 +58,14 @@ class BonjourClient: NSObject, ObservableObject, NetServiceDelegate, NetServiceB
         }
         let port = UInt16(sender.port)
         print("Resolved service: \(sender.name) at \(host):\(port)")
-        connectToService(at: host, port: port)
+        
+        // Only connect if the user initiated the connection
+        if isUserConnecting {
+            connectToService(at: host, port: port)
+            isUserConnecting = false // Reset the flag
+        } else {
+            print("Service resolved automatically, waiting for user to connect.")
+        }
     }
     
     // NetServiceDelegate: Failed to resolve service
@@ -101,6 +111,7 @@ class BonjourClient: NSObject, ObservableObject, NetServiceDelegate, NetServiceB
     }
     
     func connectToService(_ service: NetService) {
+        isUserConnecting = true // Set flag before resolving service
         service.resolve(withTimeout: 5.0)
     }
     
@@ -121,25 +132,28 @@ class BonjourClient: NSObject, ObservableObject, NetServiceDelegate, NetServiceB
     }
     
     // Send a message to the connected service
-    func sendMessage(_ message: String) {
+    func sendMessage(_ jsonObject: [String: Any]) {
         guard isConnected else {
             print("Not connected to a service. Retrying connection...")
             retryConnection()
             return
         }
         
-        guard let data = message.data(using: .utf8) else {
-            print("Failed to encode message: \(message)")
-            return
+        // Convert the JSON object into Data
+        do {
+            let jsonData = try JSONSerialization.data(withJSONObject: jsonObject, options: [])
+            
+            // Send the data over the connection
+            connection?.send(content: jsonData, completion: .contentProcessed { error in
+                if let error = error {
+                    print("Failed to send message: \(error.localizedDescription)")
+                } else {
+                    print("Message sent: \(jsonObject)")
+                }
+            })
+        } catch {
+            print("Failed to serialize JSON: \(error.localizedDescription)")
         }
-        
-        connection?.send(content: data, completion: .contentProcessed { error in
-            if let error = error {
-                print("Failed to send message: \(error.localizedDescription)")
-            } else {
-                print("Message sent: \(message)")
-            }
-        })
     }
     
     // Receive and process incoming messages
@@ -168,20 +182,99 @@ class BonjourClient: NSObject, ObservableObject, NetServiceDelegate, NetServiceB
     }
     
     // Process buffered data using newline as the message delimiter
+    
     private func processBuffer() {
-        while let range = buffer.range(of: Data("\n".utf8)) {
-            let messageData = buffer.subdata(in: buffer.startIndex..<range.startIndex)
-            buffer.removeSubrange(buffer.startIndex...range.endIndex - 1)
-            
-            if let message = String(data: messageData, encoding: .utf8) {
-                print("Received message: \(message)")
-                // Handle the message as needed
+        do {
+            // Try to deserialize the messageData into a JSON object
+            if let jsonObject = try JSONSerialization.jsonObject(with: buffer, options: []) as? [String: Any] {
+                print("Received JSON object: \(jsonObject)")
+                processJSONData(jsonObject)
             } else {
-                print("Failed to decode message.")
+                print("Received data is not a valid JSON object.")
             }
+        } catch {
+            print("Failed to decode JSON: \(error.localizedDescription)")
         }
     }
+    
+    func processJSONData(_ jsonObject: [String: Any]) {
+        // Extract the type from the JSON object
+        if let type = jsonObject["type"] as? String {
+            switch type {
+            case "overview":
+                handleOverviewType(jsonObject)
+            case "anotherType":  // Example: Handle another type of response
+                handleAnotherType(jsonObject)
+            default:
+                print("Unknown type: \(type)")
+            }
+        } else {
+            print("No 'type' found in the JSON object.")
+        }
+    }
+
+    // Function to handle the 'overview' type
+    // Function to handle the 'overview' type JSON response
+    func handleOverviewType(_ jsonObject: [String: Any]) {
+        // Extract the 'data' key, which is an array of scenes
+        if let scenes = jsonObject["data"] as? [[String: Any]] {
+            var apiResponses: [APIResponse] = []
+            
+            for scene in scenes {
+                // Extract scene data
+                if let sceneName = scene["sceneName"] as? String,
+                   let sceneIndex = scene["sceneIndex"] as? Int {
+                    
+                    var sceneItems: [SceneItem] = []
+                    
+                    // Extract sources (an array of source data)
+                    if let sources = scene["sources"] as? [[String: Any]] {
+                        for source in sources {
+                            if let sourceName = source["sourceName"] as? String,
+                               let inputKind = source["inputKind"] as? String,
+                               let sceneItemEnabled = source["sceneItemEnabled"] as? Int,
+                               let level = source["level"] as? Double {
+                                
+                                // Create SceneItem from parsed data
+                                let sceneItem = SceneItem(id: source["id"] as! Int,  // Assumes 'id' is always available
+                                                          sourceName: sourceName,
+                                                          inputKind: inputKind,
+                                                          sceneItemEnabled: sceneItemEnabled == 1, // Convert 1/0 to Bool
+                                                          level: level)
+                                
+                                sceneItems.append(sceneItem)
+                            }
+                        }
+                    }
+                    
+                    // Create an APIResponse object for this scene
+                    let apiResponse = APIResponse(sceneIndex: sceneIndex,
+                                                  sceneName: sceneName,
+                                                  sources: sceneItems)
+                    apiResponses.append(apiResponse)
+                }
+            }
+            
+            // Now `apiResponses` contains all the parsed APIResponse objects
+            print("Parsed API responses: \(apiResponses)")
+        } else {
+            print("'data' is missing or not an array in the 'overview' type JSON.")
+        }
+    }
+
+    // Function to handle another type of response (just as an example)
+    func handleAnotherType(_ jsonObject: [String: Any]) {
+        // Handle a different type of response (this can be extended based on your use case)
+        print("Handling another type of JSON response")
+    }
+    
+    
+    
+    
+    
+    
 }
+
 
 // Helper extension to extract host string from sockaddr data
 private extension Data {
