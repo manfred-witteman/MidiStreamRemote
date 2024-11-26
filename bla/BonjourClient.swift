@@ -233,7 +233,8 @@ class BonjourClient: NSObject, ObservableObject, NetServiceDelegate, NetServiceB
             for scene in scenes {
                 // Extract scene data
                 if let sceneName = scene["sceneName"] as? String,
-                   let sceneIndex = scene["sceneIndex"] as? Int {
+                   let sceneIndex = scene["sceneIndex"] as? Int, let sceneOrder = scene["sceneOrder"] as? Int{
+                    
                     
                     var sceneItems: [SceneItem] = []
                     
@@ -277,6 +278,7 @@ class BonjourClient: NSObject, ObservableObject, NetServiceDelegate, NetServiceB
                     
                     // Create an APIResponse object for this scene
                     let apiResponse = APIResponse(sceneIndex: sceneIndex,
+                                                  sceneOrder: sceneOrder,
                                                   sceneName: sceneName,
                                                   sources: sceneItems)
                     apiResponses.append(apiResponse)

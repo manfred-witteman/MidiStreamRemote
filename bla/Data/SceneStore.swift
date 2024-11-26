@@ -8,7 +8,8 @@ class SceneStore: ObservableObject {
     // Method to update the scene data (replace MockScenes)
     func updateSceneData(_ newScenes: [APIResponse]) {
         DispatchQueue.main.async {
-            self.sceneList = newScenes
+            // Sort the newScenes by sceneOrder before updating the sceneList
+            self.sceneList = newScenes.sorted { $0.sceneOrder < $1.sceneOrder }
             print("SceneList updated: \(self.sceneList.map { $0.sceneIndex })")  // Log scene indices without sorting
             self.isLoading = false
         }

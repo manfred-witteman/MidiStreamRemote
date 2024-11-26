@@ -151,8 +151,7 @@ struct ContentView: View {
                 canRewind: currentSceneIndex > 0,
                 canForward: currentSceneIndex < sceneStore.sceneList.count - 1,
             onRewind: rewindScene,
-            onForward: forwardScene,
-            onSimulateAPIUpdate: simulateAPIUpdate // Add simulation action
+            onForward: forwardScene
         )
         .padding(.vertical, 20)
         .padding(.horizontal, 20)
@@ -178,44 +177,9 @@ struct ContentView: View {
     
     // MARK: - Logic and API Simulation
     
-    private func simulateAPIUpdate() {
-        let simulatedResponse = APIResponse(
-            sceneIndex: 0, // Assuming you want to update "Scene 1"
-            sceneName: "Scene 1",
-            sources: [
-                SceneItem(id: 1, sourceName: "Slideshow Presentation", inputKind: "slideshow_v2", sceneItemEnabled: false, level: Double.random(in: 0...1))
-            ]
-        )
-        sceneStore.sceneList[simulatedResponse.sceneIndex] = simulatedResponse
-    }
+   
     
-    private func simulateDynamicAPIUpdate(sceneIndex: Int, changedItem: SceneItem) {
-        // Simulate a delay to mimic a real API response
-        DispatchQueue.global().asyncAfter(deadline: .now() + 1.0) {
-            DispatchQueue.main.async {
-                // Ensure the scene index is valid
-                guard sceneStore.sceneList.indices.contains(sceneIndex) else {
-                    print("Scene index \(sceneIndex) is out of bounds")
-                    return
-                }
-                
-                // Get the scene to update
-                var currentScene = sceneStore.sceneList[sceneIndex]
-                
-                // Find the SceneItem to update within the scene's sources
-                if let itemIndex = currentScene.sources.firstIndex(where: { $0.id == changedItem.id }) {
-                    currentScene.sources[itemIndex] = changedItem
-                    
-                    // Reassign the updated scene back to the scene list
-                    sceneStore.sceneList[sceneIndex] = currentScene
-                    print("Updated SceneItem \(changedItem.sourceName) in Scene \(currentScene.sceneName)")
-                } else {
-                    print("SceneItem with id \(changedItem.id) not found in Scene \(currentScene.sceneName)")
-                }
-            }
-        }
-    }
-    
+   
     // Scene navigation logic
     private func rewindScene() {
         guard currentSceneIndex > 0 else { return }

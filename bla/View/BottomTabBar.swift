@@ -8,8 +8,7 @@ struct BottomTabBar: View {
     // Closure properties for dynamic actions
     var onRewind: () -> Void
     var onForward: () -> Void
-    var onSimulateAPIUpdate: () -> Void // New closure for API update simulation
-
+  
     // Haptic feedback generator
     private let feedbackGenerator = UIImpactFeedbackGenerator(style: .medium)
     
@@ -72,12 +71,6 @@ struct BottomTabBar: View {
             
             Spacer()
             
-//            // Simulate API update button
-//            TabButton(icon: "arrow.triangle.2.circlepath", label: "update") {
-//                onSimulateAPIUpdate()
-//            }
-//            
-//            Spacer()
         }
         .padding()
         .background(Color.black.opacity(0.7)) // Background color with transparency
