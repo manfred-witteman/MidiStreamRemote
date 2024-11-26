@@ -129,7 +129,7 @@ struct ContentView: View {
                         showOverlay: $showOverlay,
                         currentSceneIndex: $currentSceneIndex,
                         selectedSource: $selectedSource,
-                        sceneSource: $sceneSource,
+                        sceneSource: $sceneSource,  // Pass as a binding
                         highlightColor: sceneSource.getColor()
                     )
                 }

@@ -5,11 +5,10 @@ struct LampButton: View {
     @Binding var showOverlay: Bool
     @Binding var currentSceneIndex: Int
     @Binding var selectedSource: SceneItem?
-    @Binding var sceneSource: SceneItem
+    
+    @Binding var sceneSource: SceneItem  // Make this a binding
     
     @EnvironmentObject var bonjourClient: BonjourClient // Access from the environment
-    
-    
     @EnvironmentObject var sceneStore: SceneStore  // Get the SceneStore using @EnvironmentObject
     
     private let hapticGenerator = UIImpactFeedbackGenerator(style: .medium)
@@ -44,7 +43,7 @@ struct LampButton: View {
                     .onTapGesture {
                         // Toggle sceneItemEnabled and update the scene store
                         sceneSource.sceneItemEnabled.toggle()
-                        sendAPIRequest(for: sceneSource)  // Send API request when toggling
+                        sendAPIRequest()  // Send API request when toggling
                         generateHapticFeedback()
                     }
                     .padding(.leading, 15)
@@ -75,24 +74,37 @@ struct LampButton: View {
             }
         }
     }
+
     
     func generateHapticFeedback() {
         hapticGenerator.impactOccurred() // Trigger the haptic feedback
     }
     
-    func sendAPIRequest(for sceneSource: SceneItem) {
-        let payload: [String: Any] = [
-            "sceneItemEnabled": sceneSource.sceneItemEnabled,
-            "level": sceneSource.level,
-            "sourceName": sceneSource.sourceName
-        ]
-        
-        // Correct key for the payload should be "data"
+    
+    func sendAPIRequest() {
+        // Create your SceneItem and APIResponse
+        let apiResponse = APIResponse(sceneIndex: currentSceneIndex, sceneOrder: 0, sceneName: "irrelevant", sources: [sceneSource])
+
+        // Convert APIResponse to dictionary
         let message: [String: Any] = [
-            "type": "toggle",
-            "data": payload  // Change 'payload' to 'data'
+            "type": "isSourceVisible",
+            "data": [
+                "sceneIndex": apiResponse.sceneIndex,
+                "sceneOrder": apiResponse.sceneOrder,
+                "sceneName": apiResponse.sceneName,
+                "sources": apiResponse.sources.map { source in
+                    return [
+                        "id": source.id,
+                        "sourceName": source.sourceName,
+                        "inputKind": source.inputKind,
+                        "sceneItemEnabled": source.sceneItemEnabled,
+                        "level": source.level ?? NSNull() // Replace nil with NSNull
+                    ]
+                }
+            ]
         ]
         
+        // Send the message as a dictionary
         bonjourClient.sendMessage(message)
     }
 }
