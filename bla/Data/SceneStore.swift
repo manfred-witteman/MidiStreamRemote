@@ -1,24 +1,27 @@
-import SwiftUI
+import Foundation
+import Combine
 
-    class SceneStore: ObservableObject {
-        @Published var sceneList: [APIResponse] = MockScenes.sceneList
-        
-        // Method to update a SceneItem
-        func updateSceneItem(sceneIndex: Int, updatedItem: SceneItem) {
-            // Ensure the scene index is valid
-            guard sceneList.indices.contains(sceneIndex) else {
-                print("Invalid scene index: \(sceneIndex)")
-                return
-            }
-            
-            // Find the scene and update the corresponding SceneItem
-            var scene = sceneList[sceneIndex]
-           
-            if let index = scene.sources.firstIndex(where: { $0.id == updatedItem.id }) {
-                scene.sources[index] = updatedItem // Update the item
-                sceneList[sceneIndex] = scene // Replace the scene with the updated one
-            } else {
-                print("SceneItem with id \(updatedItem.id) not found.")
-            }
+class SceneStore: ObservableObject {
+    @Published var sceneList: [APIResponse] = []  // Initially empty
+    @Published var isLoading: Bool = true         // Initially set to true
+    
+    // Method to update the scene data (replace MockScenes)
+    func updateSceneData(_ newScenes: [APIResponse]) {
+        DispatchQueue.main.async {
+            self.sceneList = newScenes
+            print("SceneList updated: \(self.sceneList.map { $0.sceneIndex })")  // Log scene indices without sorting
+            self.isLoading = false
         }
     }
+
+    // Method to handle incoming JSON and update the scene list
+    func loadData(from jsonData: Data) {
+        do {
+            let decodedResponse = try JSONDecoder().decode([APIResponse].self, from: jsonData)
+            self.updateSceneData(decodedResponse)  // Update the data
+        } catch {
+            print("Failed to decode JSON: \(error)")
+            self.isLoading = false  // In case of an error, stop loading
+        }
+    }
+}

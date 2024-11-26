@@ -1,25 +1,31 @@
 import SwiftUI
 
 struct ContentView: View {
-    @StateObject private var sceneStore = SceneStore() // Use SceneStore for managing scenes
+    @EnvironmentObject var sceneStore: SceneStore
+    
     @State private var previousSceneSources: [SceneItem] = []
     @State private var showOverlay: Bool = false
     @State private var currentSceneIndex: Int = 0
     @State private var selectedSource: SceneItem? = nil
+    
     @State private var sceneName: String = "Scene 1"
     @EnvironmentObject var bonjourClient: BonjourClient // Access from the environment
-
+    
+   
     
     
     // Load "Scene 1" directly as the initial data
-    @State private var sceneSources: [SceneItem] = MockScenes.sceneList[0].sources
+    @State private var sceneSources: [SceneItem] = []//MockScenes.sceneList[0].sources
     
     @State private var isRecording: Bool = false
     @State private var redOpacity: Double = 0.0
     
     var body: some View {
         NavigationView {
+            
             GeometryReader { geometry in
+                
+                
                 // Background Image
                 Image("tv")
                     .resizable()
@@ -36,17 +42,54 @@ struct ContentView: View {
                     
                     
                     VStack {
-                        // ScrollView content inside a container to align with the grid
-                        sceneGrid()
-                        
-                        // Bottom Tab Bar positioned at the bottom, aligned with the grid
-                        bottomTabBar()
+                        if sceneStore.isLoading {
+                            // Show progress spinner if loading
+                            VStack {
+                                Spacer()
+                                ProgressView("Loading Scenes")
+                                    .progressViewStyle(CircularProgressViewStyle(tint: .blue))
+                                Spacer()
+                            }
+                            .frame(maxWidth: .infinity, maxHeight: .infinity)
+                            .background(Color.white.opacity(0.8))
+                            .cornerRadius(10)
+                        } else {
+                            // Show content when loading is complete
+                            sceneGrid()
+                            bottomTabBar()
+                        }
                     }
                     .onChange(of: isRecording) { handleRecordingChange($0) }
-                    .onChange(of: sceneStore.sceneList) { updateScene() } // React to changes in SceneStore
+                    //.onChange(of: sceneStore.sceneList) { updateScene() }
+                    
+                    .onChange(of: sceneStore.isLoading) { isLoading in
+                        print("onChange - isLoading updated: \(isLoading)")
+                    }
+                    
+                    .onChange(of: sceneStore.sceneList) { newScenes in
+                        if !newScenes.isEmpty {
+                            print("Non-empty sceneList detected: \(newScenes.count) items")
+                            sceneStore.isLoading = false  // Hide the spinner once data is available
+                            
+                            // Update the sceneSources based on the newScenes and currentSceneIndex
+                            if sceneStore.sceneList.indices.contains(currentSceneIndex) {
+                                let currentScene = sceneStore.sceneList[currentSceneIndex]
+                                sceneSources = currentScene.sources
+                                sceneName = currentScene.sceneName
+                                print("Scene sources updated: \(sceneSources.count) items")
+                                print("onChange - sceneList updated. New count: \(newScenes.count)")
+                            }
+                            updateScene()
+                        }
+                    }
+                    
+                    
+                    // React to changes in SceneStore
                     .animation(.default.speed(1), value: showOverlay)
                     .onAppear {
-                        previousSceneSources = sceneSources
+                        print("onAppear triggered. isLoading = \(sceneStore.isLoading), sceneList = \(sceneStore.sceneList.count)")
+                          
+                        //previousSceneSources = sceneSources
                     }
                     .ignoresSafeArea(edges: .all)
                     .navigationBarHidden(showOverlay)
@@ -95,9 +138,9 @@ struct ContentView: View {
             .padding(.top, 160)
             .opacity(showOverlay ? 0 : 1)
         }
-        .onAppear {
-            updateScene() // Initialize the scene data
-        }
+//        .onAppear {
+//            updateScene() // Initialize the scene data << just disabled this
+//        }
         .navigationTitle(sceneName)
         .navigationBarTitleDisplayMode(.automatic)
     }
@@ -105,8 +148,8 @@ struct ContentView: View {
     private func bottomTabBar() -> some View {
         BottomTabBar(
             isRecording: $isRecording,
-            canRewind: currentSceneIndex > 0,
-            canForward: currentSceneIndex < sceneStore.sceneList.count - 1,
+                canRewind: currentSceneIndex > 0,
+                canForward: currentSceneIndex < sceneStore.sceneList.count - 1,
             onRewind: rewindScene,
             onForward: forwardScene,
             onSimulateAPIUpdate: simulateAPIUpdate // Add simulation action
@@ -187,15 +230,16 @@ struct ContentView: View {
     }
     
     private func updateScene() {
-        guard sceneStore.sceneList.indices.contains(currentSceneIndex) else { return }
+        
+        print("Updating scene...")
+        guard sceneStore.sceneList.indices.contains(currentSceneIndex) else {
+            print("updateScene - Invalid scene index \(currentSceneIndex)")
+            return
+        }
         let currentScene = sceneStore.sceneList[currentSceneIndex]
         sceneName = currentScene.sceneName
         sceneSources = currentScene.sources
-        
-        // If a selectedSource exists, update it as well
-        if let selectedSourceID = selectedSource?.id {
-            selectedSource = sceneSources.first { $0.id == selectedSourceID }
-        }
+        print("updateScene - sceneName: \(sceneName), sources count: \(sceneSources.count)")
     }
     
     private func handleRecordingChange(_ isRecording: Bool) {
@@ -213,8 +257,17 @@ struct ContentView: View {
     }
 }
 
-#Preview {
-    let mockBonjourClient = BonjourClient() // Create a mock instance
-    ContentView()
-        .environmentObject(mockBonjourClient) // Inject it into the environment
+struct ContentView_Preview: PreviewProvider {
+    static var previews: some View {
+        // Create a mock sceneStore (you can use MockScenes or a mock object)
+        let mockSceneStore = SceneStore()
+        
+        // Create a mock BonjourClient with the mock sceneStore
+        let mockBonjourClient = BonjourClient(sceneStore: mockSceneStore)
+        
+        // Return the ContentView with the mock BonjourClient injected as an environment object
+        return ContentView()
+            .environmentObject(mockBonjourClient)
+            .environmentObject(mockSceneStore) // Don't forget to inject the mock sceneStore as well
+    }
 }

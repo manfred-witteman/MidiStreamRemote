@@ -8,12 +8,12 @@
 
 import Foundation
 
-struct SceneItem: Identifiable, Equatable, Codable{
+struct SceneItem: Identifiable, Equatable, Codable {
     let id: Int
     var sourceName: String
     var inputKind: String
     var sceneItemEnabled: Bool
-    var level: Double
+    var level: Double?  // Make level optional
 
     static func == (lhs: SceneItem, rhs: SceneItem) -> Bool {
         return lhs.id == rhs.id &&

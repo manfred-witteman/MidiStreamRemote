@@ -2,10 +2,18 @@ import Foundation
 import Network
 
 class BonjourClient: NSObject, ObservableObject, NetServiceDelegate, NetServiceBrowserDelegate {
+    
+    private var sceneStore: SceneStore
+    init(sceneStore: SceneStore) {
+        self.sceneStore = sceneStore
+    }
+    
     @Published var services: [NetService] = []
     @Published var isRecording: Bool = false
     @Published var virtualCameraActive: Bool = false
-    @Published var isUserConnecting: Bool = false
+    
+    
+    @Published var isUserConnecting: Bool = true //false
     
     private var netServiceBrowser: NetServiceBrowser?
     private var connection: NWConnection?
@@ -14,6 +22,9 @@ class BonjourClient: NSObject, ObservableObject, NetServiceDelegate, NetServiceB
     
     private let maxRetries = 3 // Maximum retry attempts
     private var currentRetries = 0 // Current retry count
+    
+    
+    
     
     
     
@@ -212,9 +223,8 @@ class BonjourClient: NSObject, ObservableObject, NetServiceDelegate, NetServiceB
             print("No 'type' found in the JSON object.")
         }
     }
-
+    
     // Function to handle the 'overview' type
-    // Function to handle the 'overview' type JSON response
     func handleOverviewType(_ jsonObject: [String: Any]) {
         // Extract the 'data' key, which is an array of scenes
         if let scenes = jsonObject["data"] as? [[String: Any]] {
@@ -229,22 +239,40 @@ class BonjourClient: NSObject, ObservableObject, NetServiceDelegate, NetServiceB
                     
                     // Extract sources (an array of source data)
                     if let sources = scene["sources"] as? [[String: Any]] {
+                        print("Found sources: \(sources)")  // Debugging line to check sources content
+                        
                         for source in sources {
-                            if let sourceName = source["sourceName"] as? String,
+                            print("Parsing source: \(source)")  // Debugging line to check each source
+                            
+                            // Explicitly print each key-value pair for debugging
+                            for (key, value) in source {
+                                print("Key: \(key), Value: \(value)")  // Print the key and its value to understand the data structure
+                            }
+                            
+                            // Safe unwrapping of the source's properties
+                            if let sourceId = source["id"] as? Int,
+                               let sourceName = source["sourceName"] as? String,
                                let inputKind = source["inputKind"] as? String,
                                let sceneItemEnabled = source["sceneItemEnabled"] as? Int,
                                let level = source["level"] as? Double {
                                 
-                                // Create SceneItem from parsed data
-                                let sceneItem = SceneItem(id: source["id"] as! Int,  // Assumes 'id' is always available
-                                                          sourceName: sourceName,
-                                                          inputKind: inputKind,
-                                                          sceneItemEnabled: sceneItemEnabled == 1, // Convert 1/0 to Bool
-                                                          level: level)
+                                // Create a SceneItem with safe unwrapped values
+                                let sceneItem = SceneItem(
+                                    id: sourceId,
+                                    sourceName: sourceName,
+                                    inputKind: inputKind,
+                                    sceneItemEnabled: sceneItemEnabled == 1,  // Convert 1/0 to Bool
+                                    level: level
+                                )
                                 
                                 sceneItems.append(sceneItem)
+                            } else {
+                                // Print the source that failed to parse
+                                print("Failed to decode source, missing or incorrect keys: \(source)")
                             }
                         }
+                    } else {
+                        print("No sources found in scene: \(scene)")  // Debugging line if sources is nil or empty
                     }
                     
                     // Create an APIResponse object for this scene
@@ -252,16 +280,28 @@ class BonjourClient: NSObject, ObservableObject, NetServiceDelegate, NetServiceB
                                                   sceneName: sceneName,
                                                   sources: sceneItems)
                     apiResponses.append(apiResponse)
+                } else {
+                    print("Failed to decode scene data: \(scene)")  // Debugging line for missing sceneName or sceneIndex
                 }
             }
             
             // Now `apiResponses` contains all the parsed APIResponse objects
             print("Parsed API responses: \(apiResponses)")
+            
+            // Update the scene store with the newly parsed data
+            sceneStore.updateSceneData(apiResponses)
+            
         } else {
             print("'data' is missing or not an array in the 'overview' type JSON.")
         }
     }
-
+    
+    
+    // Call this method when data is received from the server
+    func didReceiveData(_ jsonData: Data) {
+        sceneStore.loadData(from: jsonData)
+    }
+    
     // Function to handle another type of response (just as an example)
     func handleAnotherType(_ jsonObject: [String: Any]) {
         // Handle a different type of response (this can be extended based on your use case)

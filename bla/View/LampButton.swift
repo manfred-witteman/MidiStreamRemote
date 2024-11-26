@@ -62,7 +62,7 @@ struct LampButton: View {
                                 .foregroundColor(sceneSource.sceneItemEnabled ? .black : .white)
                                 .lineLimit(1)
                             
-                            Text(sceneSource.sceneItemEnabled ? "\(Int(sceneSource.level * 100))%" : "Uit")
+                            Text(sceneSource.sceneItemEnabled ? "\(Int((sceneSource.level ?? 0) * 100))%" : "Uit")
                                 .font(.caption)
                                 .foregroundColor(sceneSource.sceneItemEnabled ? .gray : .white.opacity(0.7))
                         }
