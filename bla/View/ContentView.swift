@@ -7,6 +7,8 @@ struct ContentView: View {
     @State private var currentSceneIndex: Int = 0
     @State private var selectedSource: SceneItem? = nil
     @State private var sceneName: String = "Scene 1"
+    @ObservedObject var bonjourClient: BonjourClient
+    
     
     // Load "Scene 1" directly as the initial data
     @State private var sceneSources: [SceneItem] = MockScenes.sceneList[0].sources
@@ -211,5 +213,6 @@ struct ContentView: View {
 }
 
 #Preview {
-    ContentView()
+    let mockBonjourClient = BonjourClient() // Create a mock instance
+    ContentView(bonjourClient: mockBonjourClient)
 }

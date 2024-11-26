@@ -38,28 +38,37 @@ struct LampButton: View {
                             .frame(width: 24, height: 24)
                             .foregroundColor(sceneSource.sceneItemEnabled ? .white : highlightColor)
                     }
-                    .animation(.easeInOut(duration: 0.1), value: sceneSource.sceneItemEnabled)
-                    .padding(.leading, 15)
                     .onTapGesture {
                         // Toggle sceneItemEnabled and update the scene store
                         sceneSource.sceneItemEnabled.toggle()
                         sendAPIRequest(for: sceneSource)  // Send API request when toggling
                         generateHapticFeedback()
                     }
+                    .padding(.leading, 15)
 
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text(sceneSource.sourceName)
-                            .font(.subheadline)
-                            .fontWeight(.medium)
-                            .foregroundColor(sceneSource.sceneItemEnabled ? .black : .white)
-                            .lineLimit(1)
+                    // Main button for the overlay
+                    Button(action: {
+                        selectedSource = sceneSource
+                        showOverlay.toggle()
+                        generateHapticFeedback()
+                    }) {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(sceneSource.sourceName)
+                                .font(.subheadline)
+                                .fontWeight(.medium)
+                                .foregroundColor(sceneSource.sceneItemEnabled ? .black : .white)
+                                .lineLimit(1)
 
-                        Text(sceneSource.sceneItemEnabled ? "\(Int(sceneSource.level * 100))%" : "Uit")
-                            .font(.caption)
-                            .foregroundColor(sceneSource.sceneItemEnabled ? .gray : .white.opacity(0.7))
+                            Text(sceneSource.sceneItemEnabled ? "\(Int(sceneSource.level * 100))%" : "Uit")
+                                .font(.caption)
+                                .foregroundColor(sceneSource.sceneItemEnabled ? .gray : .white.opacity(0.7))
+                        }
                     }
+                    .padding(.trailing, 10)
+
+                    Spacer() // Push everything to the left within the button's frame
                 }
-                .padding(.trailing, 10)
+
             }
         }
     }
@@ -70,12 +79,11 @@ struct LampButton: View {
 
     func sendAPIRequest(for sceneSource: SceneItem) {
         // Log for testing
-        print("Sending API request for \(sceneSource.sourceName) because the state is toggled")
+        print("Sending API request for \(sceneSource.sourceName) for toggled \(sceneSource.sceneItemEnabled == true ? "on" : "off")")
 
-        let updatedItem = SceneItem(id: sceneSource.id, sourceName: sceneSource.sourceName, inputKind: sceneSource.inputKind, sceneItemEnabled: sceneSource.sceneItemEnabled, level: 22.1)
+        let updatedItem = SceneItem(id: sceneSource.id, sourceName: sceneSource.sourceName, inputKind: sceneSource.inputKind, sceneItemEnabled: sceneSource.sceneItemEnabled, level: sceneSource.level)
         
         let sceneIndex = currentSceneIndex
-        
         // Call updateSceneItem method to update the scene in the store
         sceneStore.updateSceneItem(sceneIndex: sceneIndex, updatedItem: updatedItem)
     }

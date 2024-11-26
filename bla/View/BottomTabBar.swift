@@ -72,12 +72,12 @@ struct BottomTabBar: View {
             
             Spacer()
             
-            // Simulate API update button
-            TabButton(icon: "arrow.triangle.2.circlepath", label: "update") {
-                onSimulateAPIUpdate()
-            }
-            
-            Spacer()
+//            // Simulate API update button
+//            TabButton(icon: "arrow.triangle.2.circlepath", label: "update") {
+//                onSimulateAPIUpdate()
+//            }
+//            
+//            Spacer()
         }
         .padding()
         .background(Color.black.opacity(0.7)) // Background color with transparency

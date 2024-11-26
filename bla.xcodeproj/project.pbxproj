@@ -10,9 +10,22 @@
 		744CDB662CEB684E004867CF /* bla.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = bla.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		74F73B4F2CF5C87400C3BDBC /* Exceptions for "bla" folder in "bla" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 744CDB652CEB684E004867CF /* bla */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		744CDB682CEB684E004867CF /* bla */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				74F73B4F2CF5C87400C3BDBC /* Exceptions for "bla" folder in "bla" target */,
+			);
 			path = bla;
 			sourceTree = "<group>";
 		};
@@ -255,6 +268,8 @@
 				DEVELOPMENT_TEAM = Q65984WZCF;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = bla/Info.plist;
+				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "We want to connect to your desktop";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -284,6 +299,8 @@
 				DEVELOPMENT_TEAM = Q65984WZCF;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = bla/Info.plist;
+				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "We want to connect to your desktop";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;

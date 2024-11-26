@@ -76,6 +76,8 @@ struct OverlayView: View {
 
 
 
+
 #Preview {
-    ContentView()
+    let mockBonjourClient = BonjourClient() // Create a mock instance
+    ContentView(bonjourClient: mockBonjourClient)
 }
