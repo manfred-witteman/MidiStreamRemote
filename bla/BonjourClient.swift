@@ -224,79 +224,31 @@ class BonjourClient: NSObject, ObservableObject, NetServiceDelegate, NetServiceB
         }
     }
     
-    // Function to handle the 'overview' type
     func handleOverviewType(_ jsonObject: [String: Any]) {
-        // Extract the 'data' key, which is an array of scenes
-        if let scenes = jsonObject["data"] as? [[String: Any]] {
-            var apiResponses: [APIResponse] = []
+        guard let data = jsonObject["data"] as? [[String: Any]] else {
+            print("Invalid or missing 'data' field in overview message.")
+            return
+        }
+        
+        do {
+            // Convert the array of dictionaries to JSON data
+            let jsonData = try JSONSerialization.data(withJSONObject: data)
             
-            for scene in scenes {
-                // Extract scene data
-                if let sceneName = scene["sceneName"] as? String,
-                   let sceneIndex = scene["sceneIndex"] as? Int, let sceneOrder = scene["sceneOrder"] as? Int{
-                    
-                    
-                    var sceneItems: [SceneItem] = []
-                    
-                    // Extract sources (an array of source data)
-                    if let sources = scene["sources"] as? [[String: Any]] {
-                        print("Found sources: \(sources)")  // Debugging line to check sources content
-                        
-                        for source in sources {
-                            print("Parsing source: \(source)")  // Debugging line to check each source
-                            
-                            // Explicitly print each key-value pair for debugging
-                            for (key, value) in source {
-                                print("Key: \(key), Value: \(value)")  // Print the key and its value to understand the data structure
-                            }
-                            
-                            // Safe unwrapping of the source's properties
-                            if let sourceId = source["id"] as? Int,
-                               let sourceName = source["sourceName"] as? String,
-                               let inputKind = source["inputKind"] as? String,
-                               let sceneItemEnabled = source["sceneItemEnabled"] as? Int,
-                               let level = source["level"] as? Double {
-                                
-                                // Create a SceneItem with safe unwrapped values
-                                let sceneItem = SceneItem(
-                                    id: sourceId,
-                                    sourceName: sourceName,
-                                    inputKind: inputKind,
-                                    sceneItemEnabled: sceneItemEnabled == 1,  // Convert 1/0 to Bool
-                                    level: level
-                                )
-                                
-                                sceneItems.append(sceneItem)
-                            } else {
-                                // Print the source that failed to parse
-                                print("Failed to decode source, missing or incorrect keys: \(source)")
-                            }
-                        }
-                    } else {
-                        print("No sources found in scene: \(scene)")  // Debugging line if sources is nil or empty
-                    }
-                    
-                    // Create an APIResponse object for this scene
-                    let apiResponse = APIResponse(sceneIndex: sceneIndex,
-                                                  sceneOrder: sceneOrder,
-                                                  sceneName: sceneName,
-                                                  sources: sceneItems)
-                    apiResponses.append(apiResponse)
-                } else {
-                    print("Failed to decode scene data: \(scene)")  // Debugging line for missing sceneName or sceneIndex
-                }
+            // Decode into APIResponse array
+            let decodedResponses = try JSONDecoder().decode([APIResponse].self, from: jsonData)
+            
+            // Update the SceneStore
+            DispatchQueue.main.async {
+                self.sceneStore.updateSceneData(decodedResponses)
             }
             
-            // Now `apiResponses` contains all the parsed APIResponse objects
-            print("Parsed API responses: \(apiResponses)")
-            
-            // Update the scene store with the newly parsed data
-            sceneStore.updateSceneData(apiResponses)
-            
-        } else {
-            print("'data' is missing or not an array in the 'overview' type JSON.")
+            print("Successfully processed overview data with \(decodedResponses.count) scenes.")
+        } catch {
+            print("Failed to decode APIResponse array: \(error.localizedDescription)")
         }
     }
+    
+    
     
     
     // Call this method when data is received from the server
