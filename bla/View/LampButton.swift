@@ -4,6 +4,8 @@ import UIKit
 struct LampButton: View {
     @Binding var showOverlay: Bool
     @Binding var currentSceneIndex: Int
+    @Binding var sceneName: String
+    
     @Binding var selectedSource: SceneItem?
     
     @Binding var sceneSource: SceneItem  // Make this a binding
@@ -83,11 +85,11 @@ struct LampButton: View {
     
     func sendAPIRequest() {
         // Create your SceneItem and APIResponse
-        let apiResponse = APIResponse(sceneIndex: currentSceneIndex, sceneOrder: 0, sceneName: "irrelevant", sources: [sceneSource])
+        let apiResponse = APIResponse(sceneIndex: currentSceneIndex, sceneOrder: 0, sceneName: sceneName, sources: [sceneSource])
 
         // Convert APIResponse to dictionary
         let message: [String: Any] = [
-            "type": "isSourceVisible",
+            "type": "itemEnabled",
             "data": [
                 "sceneIndex": apiResponse.sceneIndex,
                 "sceneOrder": apiResponse.sceneOrder,

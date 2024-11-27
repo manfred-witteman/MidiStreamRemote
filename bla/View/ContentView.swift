@@ -43,43 +43,49 @@ struct ContentView: View {
                     
                     VStack {
                         if sceneStore.isLoading {
-                            // Show progress spinner if loading
+//                            // Show progress spinner if loading
                             VStack {
-                                Spacer()
-                                ProgressView("Loading Scenes")
-                                    .progressViewStyle(CircularProgressViewStyle(tint: .blue))
-                                Spacer()
+                                ExpandingCirclesView()
+//                                Spacer()
+//                                ProgressView("Loading Scenes")
+//                                    .progressViewStyle(CircularProgressViewStyle(tint: .blue))
+//                                Spacer()
                             }
                             .frame(maxWidth: .infinity, maxHeight: .infinity)
                             .background(Color.white.opacity(0.8))
                             .cornerRadius(10)
+                           
                         } else {
                             // Show content when loading is complete
                             sceneGrid()
                             bottomTabBar()
                         }
                     }
-                    .onChange(of: isRecording) { handleRecordingChange($0) }
-                    //.onChange(of: sceneStore.sceneList) { updateScene() }
-                    
-                    .onChange(of: sceneStore.isLoading) { isLoading in
-                        print("onChange - isLoading updated: \(isLoading)")
+                    .onChange(of: isRecording) {
+                        handleRecordingChange($0)
                     }
                     
-                    .onChange(of: sceneStore.sceneList) { newScenes in
-                        if !newScenes.isEmpty {
-                            print("Non-empty sceneList detected: \(newScenes.count) items")
+                    .onChange(of: sceneStore.isLoading) {
+                        print("onChange - isLoading updated: \(sceneStore.isLoading)")
+                    }
+                    
+                    .onChange(of: sceneStore.sceneList) {
+                        if !sceneStore.sceneList.isEmpty {
+                            print("Non-empty sceneList detected: \(sceneStore.sceneList.count) items")
                             sceneStore.isLoading = false  // Hide the spinner once data is available
                             
-                            // Update the sceneSources based on the newScenes and currentSceneIndex
+                            // Update sceneSources and sceneName based on currentSceneIndex
                             if sceneStore.sceneList.indices.contains(currentSceneIndex) {
                                 let currentScene = sceneStore.sceneList[currentSceneIndex]
                                 sceneSources = currentScene.sources
                                 sceneName = currentScene.sceneName
                                 print("Scene sources updated: \(sceneSources.count) items")
-                                print("onChange - sceneList updated. New count: \(newScenes.count)")
+                                print("onChange - sceneList updated. New count: \(sceneStore.sceneList.count)")
+                            } else {
+                                print("Current scene index \(currentSceneIndex) is out of bounds.")
                             }
-                            updateScene()
+                        } else {
+                            print("Scene list is empty.")
                         }
                     }
                     
@@ -128,6 +134,7 @@ struct ContentView: View {
                     LampButton(
                         showOverlay: $showOverlay,
                         currentSceneIndex: $currentSceneIndex,
+                        sceneName: $sceneName,
                         selectedSource: $selectedSource,
                         sceneSource: $sceneSource,  // Pass as a binding
                         highlightColor: sceneSource.getColor()

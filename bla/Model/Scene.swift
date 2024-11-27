@@ -30,3 +30,10 @@ struct APIResponse: Codable, Equatable {
     let sceneName: String
     var sources: [SceneItem]
 }
+
+
+struct ItemUpdate: Codable {
+    let sceneName: String
+    let sceneItemId: Int
+    let sceneItemEnabled: Int
+}

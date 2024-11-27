@@ -1,3 +1,11 @@
+//
+//  ExpandingCirclesView.swift
+//  bla
+//
+//  Created by manfred on 27/11/2024.
+//
+
+
 import SwiftUI
 
 struct ExpandingCirclesView: View {
@@ -26,11 +34,6 @@ struct ExpandingCirclesView: View {
     }
 }
 
-struct ContentView: View {
-    var body: some View {
-        ExpandingCirclesView()
-    }
-}
 
 struct ExpandingCirclesView_Previews: PreviewProvider {
     static var previews: some View {

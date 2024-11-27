@@ -25,4 +25,29 @@ class SceneStore: ObservableObject {
             self.isLoading = false  // In case of an error, stop loading
         }
     }
+    
+   
+    
+    // Method to update a specific scene item by sceneIndex and item id
+    func updateSceneItem(newItem: ItemUpdate) {
+        DispatchQueue.main.async {
+            // Find the index of the scene in the sceneList by sceneName
+            guard let sceneIdx = self.sceneList.firstIndex(where: { $0.sceneName == newItem.sceneName }) else {
+                print("Scene with name \(newItem.sceneName) not found.")
+                return
+            }
+            
+            // Find the index of the item in the sources array by sceneItemId
+            guard let itemIdx = self.sceneList[sceneIdx].sources.firstIndex(where: { $0.id == newItem.sceneItemId }) else {
+                print("SceneItem with ID \(newItem.sceneItemId) not found in scene \(newItem.sceneName).")
+                return
+            }
+            
+            // Update the specific SceneItem's enabled state
+            self.sceneList[sceneIdx].sources[itemIdx].sceneItemEnabled = newItem.sceneItemEnabled == 1
+            
+            print("Updated SceneItem with ID \(newItem.sceneItemId) in scene '\(newItem.sceneName)' to enabled: \(newItem.sceneItemEnabled).")
+        }
+    }
+    
 }

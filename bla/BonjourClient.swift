@@ -180,7 +180,10 @@ class BonjourClient: NSObject, ObservableObject, NetServiceDelegate, NetServiceB
             
             if let data = data {
                 self.buffer.append(data)
-                self.processBuffer()
+                
+                print("Buffer before processing: \(buffer.count) bytes")
+                self.processBuffer()  // Your existing function
+                print("Buffer after processing: \(buffer.count) bytes")
             }
             
             if isComplete {
@@ -195,17 +198,32 @@ class BonjourClient: NSObject, ObservableObject, NetServiceDelegate, NetServiceB
     // Process buffered data using newline as the message delimiter
     
     private func processBuffer() {
+        print("Raw buffer data: \(buffer)")
+        if let bufferString = String(data: buffer, encoding: .utf8) {
+            print("Buffer as string: \(bufferString)")
+        } else {
+            print("Buffer could not be converted to a string.")
+        }
+
         do {
             // Try to deserialize the messageData into a JSON object
             if let jsonObject = try JSONSerialization.jsonObject(with: buffer, options: []) as? [String: Any] {
                 print("Received JSON object: \(jsonObject)")
                 processJSONData(jsonObject)
+
+                // Clear the buffer after successful processing
+                buffer.removeAll()
+                print("Buffer cleared after processing.")
             } else {
                 print("Received data is not a valid JSON object.")
             }
         } catch {
             print("Failed to decode JSON: \(error.localizedDescription)")
         }
+        
+        // If decoding fails, clear the buffer to avoid retrying the same data
+        buffer.removeAll()
+        print("Buffer cleared after failed processing.")
     }
     
     func processJSONData(_ jsonObject: [String: Any]) {
@@ -214,8 +232,8 @@ class BonjourClient: NSObject, ObservableObject, NetServiceDelegate, NetServiceB
             switch type {
             case "overview":
                 handleOverviewType(jsonObject)
-            case "anotherType":  // Example: Handle another type of response
-                handleAnotherType(jsonObject)
+            case "itemUpdate":
+                handleItemUpdate(jsonObject)
             default:
                 print("Unknown type: \(type)")
             }
@@ -256,16 +274,34 @@ class BonjourClient: NSObject, ObservableObject, NetServiceDelegate, NetServiceB
         sceneStore.loadData(from: jsonData)
     }
     
-    // Function to handle another type of response (just as an example)
-    func handleAnotherType(_ jsonObject: [String: Any]) {
-        // Handle a different type of response (this can be extended based on your use case)
-        print("Handling another type of JSON response")
+    func handleItemUpdate(_ jsonObject: [String: Any]) {
+        print("Handling Item update")
+        
+        do {
+            // Extract the 'data' dictionary from the incoming jsonObject
+            guard let data = jsonObject["data"] as? [String: Any] else {
+                print("Missing 'data' field in the incoming JSON.")
+                return
+            }
+            
+            // Decode the extracted 'data' dictionary into ItemUpdate
+            let jsonData = try JSONSerialization.data(withJSONObject: data)
+            
+            // Decode into ItemUpdate struct
+            let itemUpdate = try JSONDecoder().decode(ItemUpdate.self, from: jsonData)
+            
+            print("Successfully decoded ItemUpdate: \(itemUpdate)")
+            
+            // Dispatch the update to the main thread for further processing
+            DispatchQueue.main.async {
+                self.sceneStore.updateSceneItem(newItem: itemUpdate)
+            }
+        } catch {
+            print("Failed to decode ItemUpdate: \(error.localizedDescription)")
+        }
     }
     
-    
-    
-    
-    
+  
     
 }
 
@@ -276,7 +312,7 @@ private extension Data {
         return withUnsafeBytes {
             guard let sockaddr = $0.baseAddress?.assumingMemoryBound(to: sockaddr.self) else { return nil }
             if sockaddr.pointee.sa_family == sa_family_t(AF_INET) {
-                var addr = sockaddr.withMemoryRebound(to: sockaddr_in.self, capacity: 1) { $0.pointee }
+                let addr = sockaddr.withMemoryRebound(to: sockaddr_in.self, capacity: 1) { $0.pointee }
                 return String(cString: inet_ntoa(addr.sin_addr))
             } else if sockaddr.pointee.sa_family == sa_family_t(AF_INET6) {
                 var addr = sockaddr.withMemoryRebound(to: sockaddr_in6.self, capacity: 1) { $0.pointee }
